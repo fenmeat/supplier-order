@@ -306,6 +306,105 @@
   }
   .order-qty-input:focus { outline: none; border-color: var(--royal-blue-dark); }
 
+  /* ---------- Purchase Order screen ---------- */
+  .po-banner {
+    background: var(--charcoal);
+    color: var(--white);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+  .po-number {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--silver);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .po-total {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--white);
+    margin-top: 4px;
+  }
+  .po-total-label { font-size: 12px; color: var(--silver); font-weight: 500; }
+
+  .po-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--silver);
+  }
+  .po-line:last-child { border-bottom: none; }
+  .po-line-name { font-size: 14.5px; font-weight: 600; color: var(--charcoal); }
+  .po-line-qty { font-size: 12.5px; color: var(--charcoal); opacity: 0.6; margin-top: 2px; }
+  .po-line-value { font-size: 15px; font-weight: 700; color: var(--charcoal); white-space: nowrap; }
+
+  .contact-card {
+    background: var(--platinum);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin: 18px 0;
+  }
+  .contact-fields { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+  .contact-input {
+    width: 100%;
+    border: 2px solid var(--silver);
+    border-radius: 10px;
+    background: var(--white);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    color: var(--charcoal);
+    padding: 10px 12px;
+    font-size: 15px;
+  }
+  .contact-input:focus { outline: none; border-color: var(--royal-blue); }
+  .save-contact-btn {
+    background: var(--charcoal);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 13.5px;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+
+  .send-buttons { display: flex; flex-direction: column; gap: 10px; }
+  .send-btn {
+    width: 100%;
+    border: none;
+    border-radius: 14px;
+    padding: 15px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .send-btn.whatsapp { background: #25D366; color: var(--white); }
+  .send-btn.email { background: var(--royal-blue); color: var(--white); }
+  .send-btn:disabled { opacity: 0.4; cursor: default; }
+  .send-hint { font-size: 12px; color: var(--charcoal); opacity: 0.55; margin-top: 6px; text-align: center; }
+  .status-pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--green);
+    color: var(--white);
+    margin-top: 8px;
+  }
+
   /* ---------- Bottom action bar ---------- */
   .bottom-bar {
     position: fixed;
@@ -444,6 +543,25 @@
     </div>
   </div>
 
+  <!-- ===================== PURCHASE ORDER SCREEN ===================== -->
+  <div id="screen-po">
+    <header>
+      <button class="back-btn" id="back-btn-po">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Needs Calculator
+      </button>
+      <div class="header-row" style="margin-top:6px;">
+        <div>
+          <div class="brand" style="font-size:19px;"><span id="po-supplier-name">—</span></div>
+          <div class="brand-sub" style="text-transform:none; letter-spacing:0.3px;">Purchase Order</div>
+        </div>
+      </div>
+    </header>
+    <main>
+      <div id="po-content" class="loading">Building purchase order…</div>
+    </main>
+  </div>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -498,10 +616,13 @@
   let currentSupplier = null;
   let currentMaterials = [];
   let currentNeeds = [];
+  let currentPO = null;
+  let currentSupplierContact = { phone: '', email: '' };
+  let suppliersMap = {};
 
   // ---------- Screen switching ----------
   function showScreen(name) {
-    const screens = ['suppliers', 'stockcount', 'needs'];
+    const screens = ['suppliers', 'stockcount', 'needs', 'po'];
     screens.forEach(s => {
       const el = document.getElementById('screen-' + s);
       el.style.display = (s === name) ? 'flex' : 'none';
@@ -520,6 +641,9 @@
 
       const due = data.suppliers.filter(s => s.dueToday);
       const notDue = data.suppliers.filter(s => !s.dueToday);
+
+      suppliersMap = {};
+      data.suppliers.forEach(s => { suppliersMap[s.name] = s; });
 
       let html = '';
       if (due.length > 0) {
@@ -762,7 +886,7 @@
       if (data.status !== 'ok') throw new Error(data.message || 'Save failed');
 
       showToast(`Order plan saved · ${data.saved} items`);
-      setTimeout(() => showScreen('suppliers'), 700);
+      setTimeout(() => openPurchaseOrder(currentSupplier), 700);
     } catch (err) {
       showToast('Could not save. Try again.', true);
     } finally {
@@ -771,11 +895,155 @@
     }
   }
 
+  // ---------- Purchase Order ----------
+  function toWhatsAppPhone(raw) {
+    let digits = String(raw || '').replace(/\D/g, '');
+    if (!digits) return '';
+    if (digits.startsWith('0')) digits = '27' + digits.substring(1);
+    return digits;
+  }
+
+  function buildPOMessage(po) {
+    const lines = po.items.map(li => `- ${li.name}: ${li.qty} ${li.unit} @ R${li.price.toFixed(2)} = R${li.lineTotal.toFixed(2)}`);
+    return `FenMeat Purchase Order ${po.poNumber}\nSupplier: ${po.supplier}\nDate: ${po.date}\n\nItems:\n${lines.join('\n')}\n\nTotal: R${po.total.toFixed(2)}`;
+  }
+
+  async function openPurchaseOrder(name) {
+    document.getElementById('po-supplier-name').textContent = name;
+    showScreen('po');
+
+    const contentEl = document.getElementById('po-content');
+    contentEl.className = 'loading';
+    contentEl.textContent = 'Building purchase order…';
+
+    const contact = suppliersMap[name] || {};
+    currentSupplierContact = { phone: contact.contactPhone || '', email: contact.contactEmail || '' };
+
+    try {
+      const data = await apiPost('createPurchaseOrder', { date: todayISO(), supplier: name });
+      if (data.status !== 'ok') throw new Error(data.message || 'Failed to build purchase order');
+
+      currentPO = data;
+
+      if (!currentPO.items || currentPO.items.length === 0) {
+        contentEl.className = 'empty-state';
+        contentEl.textContent = 'No items with an order quantity above 0 — nothing to order this time.';
+        return;
+      }
+
+      contentEl.className = '';
+      contentEl.innerHTML = poScreenHTML(currentPO);
+      wirePOScreen();
+    } catch (err) {
+      contentEl.className = 'empty-state';
+      contentEl.textContent = 'Could not build purchase order. Check your connection and try again.';
+    }
+  }
+
+  function poScreenHTML(po) {
+    const linesHTML = po.items.map(li => `
+      <div class="po-line">
+        <div>
+          <div class="po-line-name">${escapeHtml(li.name)}</div>
+          <div class="po-line-qty">${li.qty} ${escapeHtml(li.unit)} @ R${li.price.toFixed(2)}</div>
+        </div>
+        <div class="po-line-value">R${li.lineTotal.toFixed(2)}</div>
+      </div>`).join('');
+
+    const hasPhone = !!currentSupplierContact.phone;
+    const hasEmail = !!currentSupplierContact.email;
+
+    return `
+      <div class="po-banner">
+        <div class="po-number">${escapeHtml(po.poNumber)}</div>
+        <div class="po-total-label">Total value</div>
+        <div class="po-total">R${po.total.toFixed(2)}</div>
+      </div>
+
+      <div class="section-label">Line items</div>
+      <div class="po-lines">${linesHTML}</div>
+
+      <div class="contact-card">
+        <div class="field-label">Supplier contact</div>
+        <div class="contact-fields">
+          <input type="tel" inputmode="tel" class="contact-input" id="contact-phone" placeholder="Phone (e.g. 082 123 4567)" value="${escapeHtml(currentSupplierContact.phone)}">
+          <input type="email" class="contact-input" id="contact-email" placeholder="Email address" value="${escapeHtml(currentSupplierContact.email)}">
+          <button class="save-contact-btn" id="save-contact-btn">Save Contact Details</button>
+        </div>
+      </div>
+
+      <div class="section-label">Send this order</div>
+      <div class="send-buttons">
+        <button class="send-btn whatsapp" id="send-whatsapp-btn" ${hasPhone ? '' : 'disabled'}>Send via WhatsApp</button>
+        <button class="send-btn email" id="send-email-btn" ${hasEmail ? '' : 'disabled'}>Send via Email</button>
+      </div>
+      <div class="send-hint">${(!hasPhone || !hasEmail) ? 'Add a phone number / email above to enable sending.' : 'Opens WhatsApp or your email app with the order pre-filled.'}</div>
+      <div id="po-status-pill"></div>
+    `;
+  }
+
+  function wirePOScreen() {
+    document.getElementById('save-contact-btn').addEventListener('click', saveSupplierContact);
+    const waBtn = document.getElementById('send-whatsapp-btn');
+    const emailBtn = document.getElementById('send-email-btn');
+    if (waBtn) waBtn.addEventListener('click', () => sendPO('whatsapp'));
+    if (emailBtn) emailBtn.addEventListener('click', () => sendPO('email'));
+  }
+
+  async function saveSupplierContact() {
+    const phone = document.getElementById('contact-phone').value.trim();
+    const email = document.getElementById('contact-email').value.trim();
+    const btn = document.getElementById('save-contact-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    try {
+      const data = await apiPost('updateSupplier', {
+        originalName: currentSupplier,
+        supplier: { contactPhone: phone, contactEmail: email }
+      });
+      if (data.status !== 'ok') throw new Error(data.message);
+      currentSupplierContact = { phone, email };
+      if (suppliersMap[currentSupplier]) {
+        suppliersMap[currentSupplier].contactPhone = phone;
+        suppliersMap[currentSupplier].contactEmail = email;
+      }
+      document.getElementById('send-whatsapp-btn').disabled = !phone;
+      document.getElementById('send-email-btn').disabled = !email;
+      showToast('Contact details saved');
+    } catch (err) {
+      showToast('Could not save contact details.', true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save Contact Details';
+    }
+  }
+
+  function sendPO(channel) {
+    if (!currentPO) return;
+    const message = buildPOMessage(currentPO);
+
+    if (channel === 'whatsapp') {
+      const phone = toWhatsAppPhone(currentSupplierContact.phone);
+      if (!phone) { showToast('Add a phone number first.', true); return; }
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+    } else {
+      const email = currentSupplierContact.email;
+      if (!email) { showToast('Add an email address first.', true); return; }
+      const subject = `FenMeat Purchase Order ${currentPO.poNumber}`;
+      window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+    }
+
+    apiPost('markPurchaseOrderSent', { poNumber: currentPO.poNumber, channel: channel }).catch(() => {});
+    const pill = document.getElementById('po-status-pill');
+    if (pill) pill.innerHTML = `<div class="status-pill">Sent via ${channel === 'whatsapp' ? 'WhatsApp' : 'Email'}</div>`;
+  }
+
   // ---------- Wire up ----------
   document.getElementById('back-btn').addEventListener('click', () => showScreen('suppliers'));
   document.getElementById('save-btn').addEventListener('click', saveStockCount);
   document.getElementById('back-btn-needs').addEventListener('click', () => showScreen('stockcount'));
   document.getElementById('save-order-btn').addEventListener('click', saveOrderPlan);
+  document.getElementById('back-btn-po').addEventListener('click', () => showScreen('needs'));
 
   // ---------- Init ----------
   showScreen('suppliers');
