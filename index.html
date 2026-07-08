@@ -233,6 +233,79 @@
     margin-top: 2px;
   }
 
+  /* ---------- Needs Calculator ---------- */
+  .window-banner {
+    background: #EAF0FF;
+    border: 2px solid var(--royal-blue);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+  }
+  .window-banner-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--royal-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+  }
+  .window-banner-dates {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--charcoal);
+  }
+
+  .needs-row {
+    background: var(--platinum);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .needs-row.manual {
+    background: #FFF7ED;
+  }
+  .needs-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .manual-tag {
+    background: var(--amber);
+    color: var(--white);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    padding: 4px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .needs-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .needs-readonly {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--charcoal);
+    padding: 10px 0 0;
+  }
+  .needs-readonly.dim { opacity: 0.4; font-weight: 500; font-size: 14px; }
+  .order-qty-input {
+    width: 100%;
+    border: 2px solid var(--royal-blue);
+    border-radius: 10px;
+    background: var(--white);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    color: var(--royal-blue);
+    padding: 10px 10px;
+    font-size: 17px;
+  }
+  .order-qty-input:focus { outline: none; border-color: var(--royal-blue-dark); }
+
   /* ---------- Bottom action bar ---------- */
   .bottom-bar {
     position: fixed;
@@ -349,6 +422,28 @@
     </div>
   </div>
 
+  <!-- ===================== NEEDS CALCULATOR SCREEN ===================== -->
+  <div id="screen-needs">
+    <header>
+      <button class="back-btn" id="back-btn-needs">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Stock Count
+      </button>
+      <div class="header-row" style="margin-top:6px;">
+        <div>
+          <div class="brand" style="font-size:19px;"><span id="needs-supplier-name">—</span></div>
+          <div class="brand-sub" style="text-transform:none; letter-spacing:0.3px;">Needs Calculator</div>
+        </div>
+      </div>
+    </header>
+    <main>
+      <div id="needs-content" class="loading">Calculating…</div>
+    </main>
+    <div class="bottom-bar">
+      <button class="save-btn" id="save-order-btn">Save Order Plan</button>
+    </div>
+  </div>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -402,13 +497,16 @@
   // ---------- State ----------
   let currentSupplier = null;
   let currentMaterials = [];
+  let currentNeeds = [];
 
   // ---------- Screen switching ----------
   function showScreen(name) {
-    document.getElementById('screen-suppliers').style.display = name === 'suppliers' ? 'flex' : 'none';
-    document.getElementById('screen-stockcount').style.display = name === 'stockcount' ? 'flex' : 'none';
-    document.getElementById('screen-suppliers').style.flexDirection = 'column';
-    document.getElementById('screen-stockcount').style.flexDirection = 'column';
+    const screens = ['suppliers', 'stockcount', 'needs'];
+    screens.forEach(s => {
+      const el = document.getElementById('screen-' + s);
+      el.style.display = (s === name) ? 'flex' : 'none';
+      el.style.flexDirection = 'column';
+    });
     window.scrollTo(0, 0);
   }
 
@@ -559,7 +657,7 @@
       if (data.status !== 'ok') throw new Error(data.message || 'Save failed');
 
       showToast(`Saved · ${data.saved} items` + (data.pricesUpdated ? ` · ${data.pricesUpdated} prices updated` : ''));
-      setTimeout(() => showScreen('suppliers'), 700);
+      setTimeout(() => openNeedsCalculator(currentSupplier), 700);
     } catch (err) {
       showToast('Could not save. Try again.', true);
     } finally {
@@ -568,9 +666,116 @@
     }
   }
 
+  // ---------- Needs Calculator ----------
+  function formatDateLabel(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso + 'T12:00:00');
+    return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+  }
+
+  async function openNeedsCalculator(name) {
+    document.getElementById('needs-supplier-name').textContent = name;
+    showScreen('needs');
+
+    const contentEl = document.getElementById('needs-content');
+    contentEl.className = 'loading';
+    contentEl.textContent = 'Calculating…';
+
+    try {
+      const data = await apiGet('getRawMaterialNeeds', { supplier: name, date: todayISO() });
+      if (data.status !== 'ok') throw new Error(data.message || 'Failed to calculate needs');
+
+      currentNeeds = data.items;
+
+      let html = `
+        <div class="window-banner">
+          <div class="window-banner-label">This order covers</div>
+          <div class="window-banner-dates">${formatDateLabel(data.windowStart)} – ${formatDateLabel(data.windowEnd)}</div>
+        </div>`;
+
+      if (currentNeeds.length === 0) {
+        contentEl.className = 'empty-state';
+        contentEl.textContent = 'No raw materials found for this supplier yet.';
+        return;
+      }
+
+      html += currentNeeds.map((item, i) => needsRowHTML(item, i)).join('');
+      contentEl.className = '';
+      contentEl.innerHTML = html;
+    } catch (err) {
+      contentEl.className = 'empty-state';
+      contentEl.textContent = 'Could not calculate needs. Check your connection and try again.';
+    }
+  }
+
+  function needsRowHTML(item, idx) {
+    const manual = !item.hasRecipeLink;
+    const defaultOrderQty = item.suggestedOrderQty != null ? item.suggestedOrderQty : '';
+    return `
+      <div class="needs-row ${manual ? 'manual' : ''}" data-idx="${idx}">
+        <div class="needs-top">
+          <div class="material-name">${escapeHtml(item.name)}</div>
+          ${manual ? `<div class="manual-tag">Manual entry</div>` : ''}
+        </div>
+        <div class="needs-fields">
+          <div class="field-block">
+            <div class="field-label">Forecast need</div>
+            <div class="needs-readonly ${manual ? 'dim' : ''}">${manual ? 'No recipe link' : (item.forecastNeed + ' ' + item.unit)}</div>
+          </div>
+          <div class="field-block">
+            <div class="field-label">Stock counted</div>
+            <div class="needs-readonly ${manual ? 'dim' : ''}">${item.stockCounted != null ? (item.stockCounted + ' ' + item.unit) : '—'}</div>
+          </div>
+          <div class="field-block">
+            <div class="field-label">Order qty</div>
+            <input type="number" inputmode="decimal" class="order-qty-input" data-idx="${idx}" value="${defaultOrderQty}" placeholder="0" min="0" step="any">
+          </div>
+        </div>
+      </div>`;
+  }
+
+  async function saveOrderPlan() {
+    if (!currentSupplier || currentNeeds.length === 0) return;
+
+    const btn = document.getElementById('save-order-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    const rows = currentNeeds.map((item, i) => {
+      const el = document.querySelector(`.order-qty-input[data-idx="${i}"]`);
+      const orderQty = el && el.value !== '' ? Number(el.value) : 0;
+      return {
+        rmCode: item.rmCode,
+        name: item.name,
+        forecastNeed: item.forecastNeed,
+        stockCounted: item.stockCounted,
+        orderQty: orderQty
+      };
+    });
+
+    try {
+      const data = await apiPost('writeOrderPlan', {
+        date: todayISO(),
+        supplier: currentSupplier,
+        rows
+      });
+      if (data.status !== 'ok') throw new Error(data.message || 'Save failed');
+
+      showToast(`Order plan saved · ${data.saved} items`);
+      setTimeout(() => showScreen('suppliers'), 700);
+    } catch (err) {
+      showToast('Could not save. Try again.', true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save Order Plan';
+    }
+  }
+
   // ---------- Wire up ----------
   document.getElementById('back-btn').addEventListener('click', () => showScreen('suppliers'));
   document.getElementById('save-btn').addEventListener('click', saveStockCount);
+  document.getElementById('back-btn-needs').addEventListener('click', () => showScreen('stockcount'));
+  document.getElementById('save-order-btn').addEventListener('click', saveOrderPlan);
 
   // ---------- Init ----------
   showScreen('suppliers');
