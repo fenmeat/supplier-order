@@ -405,6 +405,49 @@
     margin-top: 8px;
   }
 
+  /* ---------- Supplier Notes ---------- */
+  .note-input {
+    width: 100%;
+    border: 2px solid var(--silver);
+    border-radius: 10px;
+    background: var(--white);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    color: var(--charcoal);
+    padding: 10px 12px;
+    font-size: 14.5px;
+    resize: vertical;
+    min-height: 60px;
+  }
+  .note-input:focus { outline: none; border-color: var(--royal-blue); }
+  .add-note-btn {
+    background: var(--royal-blue);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 13.5px;
+    cursor: pointer;
+    margin-top: 8px;
+    width: 100%;
+  }
+  .note-item {
+    background: var(--platinum);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .note-item-text { font-size: 14px; color: var(--charcoal); line-height: 1.4; }
+  .note-item-meta {
+    font-size: 11px;
+    color: var(--charcoal);
+    opacity: 0.5;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
   /* ---------- Bottom action bar ---------- */
   .bottom-bar {
     position: fixed;
@@ -979,6 +1022,11 @@
       </div>
       <div class="send-hint">${(!hasPhone || !hasEmail) ? 'Add a phone number / email above to enable sending.' : 'Opens WhatsApp or your email app with the order pre-filled.'}</div>
       <div id="po-status-pill"></div>
+
+      <div class="section-label">Supplier notes</div>
+      <textarea class="note-input" id="new-note-input" placeholder="e.g. Salt is short, supplier said Tuesday instead"></textarea>
+      <button class="add-note-btn" id="add-note-btn">Add Note</button>
+      <div id="notes-list" style="margin-top:14px;"></div>
     `;
   }
 
@@ -988,6 +1036,62 @@
     const emailBtn = document.getElementById('send-email-btn');
     if (waBtn) waBtn.addEventListener('click', () => sendPO('whatsapp'));
     if (emailBtn) emailBtn.addEventListener('click', () => sendPO('email'));
+    document.getElementById('add-note-btn').addEventListener('click', addSupplierNote);
+    loadSupplierNotes();
+  }
+
+  function noteItemHTML(n) {
+    const d = n.timestamp ? new Date(n.timestamp) : null;
+    const when = d ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ' · ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
+    return `
+      <div class="note-item">
+        <div class="note-item-text">${escapeHtml(n.note)}</div>
+        <div class="note-item-meta">${when}${n.poNumber ? ' · ' + escapeHtml(n.poNumber) : ''}</div>
+      </div>`;
+  }
+
+  async function loadSupplierNotes() {
+    const listEl = document.getElementById('notes-list');
+    if (!listEl) return;
+    listEl.innerHTML = '<div class="loading" style="padding:20px 0;">Loading notes…</div>';
+    try {
+      const data = await apiGet('getSupplierNotes', { supplier: currentSupplier });
+      if (data.status !== 'ok') throw new Error(data.message);
+      if (!data.notes || data.notes.length === 0) {
+        listEl.innerHTML = '<div class="empty-state" style="padding:20px 0;">No notes yet for this supplier.</div>';
+        return;
+      }
+      listEl.innerHTML = data.notes.map(noteItemHTML).join('');
+    } catch (err) {
+      listEl.innerHTML = '<div class="empty-state" style="padding:20px 0;">Could not load notes.</div>';
+    }
+  }
+
+  async function addSupplierNote() {
+    const input = document.getElementById('new-note-input');
+    const note = input.value.trim();
+    if (!note) return;
+
+    const btn = document.getElementById('add-note-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    try {
+      const data = await apiPost('addSupplierNote', {
+        supplier: currentSupplier,
+        poNumber: currentPO ? currentPO.poNumber : '',
+        note: note
+      });
+      if (data.status !== 'ok') throw new Error(data.message);
+      input.value = '';
+      showToast('Note added');
+      loadSupplierNotes();
+    } catch (err) {
+      showToast('Could not save note.', true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Add Note';
+    }
   }
 
   async function saveSupplierContact() {
