@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FenMeat Supplier Orders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --royal-blue: #003CFF;
+    --royal-blue-dark: #0030CC;
+    --charcoal: #1F2937;
+    --silver: #D1D5DB;
+    --platinum: #F4F4F5;
+    --white: #FFFFFF;
+    --green: #16A34A;
+    --amber: #D97706;
+    --red: #DC2626;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--white);
+    color: var(--charcoal);
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    height: 100%;
+  }
+
+  #app {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--white);
+  }
+
+  /* ---------- Header ---------- */
+  header {
+    padding: 18px 20px 14px;
+    background: var(--charcoal);
+    color: var(--white);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+  }
+  .brand .fen { color: var(--royal-blue); }
+  .brand .meat { color: var(--white); }
+  .brand-sub {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--silver);
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .today-date {
+    font-size: 13px;
+    color: var(--silver);
+    font-weight: 500;
+  }
+
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 15px;
+    font-weight: 600;
+    padding: 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+  .back-btn svg { width: 18px; height: 18px; }
+
+  /* ---------- Main content ---------- */
+  main {
+    flex: 1;
+    padding: 20px;
+    padding-bottom: 100px;
+  }
+
+  .section-label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--charcoal);
+    opacity: 0.55;
+    margin: 22px 0 10px;
+  }
+  .section-label:first-child { margin-top: 0; }
+
+  /* ---------- Supplier cards ---------- */
+  .supplier-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--platinum);
+    border: 2px solid transparent;
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: transform 0.08s ease, border-color 0.15s ease;
+  }
+  .supplier-card:active { transform: scale(0.98); }
+
+  .supplier-card.due {
+    background: #EAF0FF;
+    border-color: var(--royal-blue);
+  }
+
+  .supplier-card.quiet {
+    opacity: 0.55;
+  }
+
+  .supplier-info { display: flex; flex-direction: column; gap: 3px; }
+  .supplier-name { font-size: 17px; font-weight: 600; color: var(--charcoal); }
+  .supplier-meta { font-size: 12.5px; color: var(--charcoal); opacity: 0.65; }
+
+  .due-tag {
+    background: var(--royal-blue);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .chevron { color: var(--charcoal); opacity: 0.35; }
+
+  /* ---------- Stock count rows ---------- */
+  .material-row {
+    background: var(--platinum);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .material-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .material-name { font-size: 15.5px; font-weight: 600; color: var(--charcoal); line-height: 1.3; }
+  .material-cat {
+    font-size: 11px;
+    color: var(--royal-blue);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-top: 2px;
+  }
+
+  .material-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .field-block { display: flex; flex-direction: column; gap: 4px; }
+  .field-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--charcoal);
+    opacity: 0.55;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .qty-input, .price-input {
+    width: 100%;
+    border: 2px solid var(--silver);
+    border-radius: 10px;
+    background: var(--white);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: var(--charcoal);
+    padding: 10px 10px;
+    font-size: 17px;
+    text-align: left;
+  }
+  .qty-input:focus, .price-input:focus {
+    outline: none;
+    border-color: var(--royal-blue);
+  }
+  .price-input { font-size: 15px; }
+  .price-input::before { content: 'R'; }
+
+  .price-wrap { position: relative; }
+  .price-wrap .currency-r {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--charcoal);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .price-wrap .price-input { padding-left: 24px; }
+
+  .unit-hint {
+    font-size: 12px;
+    color: var(--charcoal);
+    opacity: 0.5;
+    margin-top: 2px;
+  }
+
+  /* ---------- Bottom action bar ---------- */
+  .bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 480px;
+    margin: 0 auto;
+    background: var(--white);
+    border-top: 1px solid var(--silver);
+    padding: 14px 20px calc(14px + env(safe-area-inset-bottom));
+    z-index: 20;
+  }
+
+  .save-btn {
+    width: 100%;
+    background: var(--royal-blue);
+    color: var(--white);
+    border: none;
+    border-radius: 14px;
+    padding: 16px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .save-btn:active { background: var(--royal-blue-dark); }
+  .save-btn:disabled { opacity: 0.5; cursor: default; }
+
+  /* ---------- States ---------- */
+  .loading, .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--charcoal);
+    opacity: 0.55;
+    font-size: 15px;
+  }
+
+  .toast {
+    position: fixed;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--green);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 12px 20px;
+    border-radius: 30px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.error { background: var(--red); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(6px); }
+
+  .price-updated-badge {
+    font-size: 10.5px;
+    color: var(--green);
+    font-weight: 700;
+    margin-top: 4px;
+    display: none;
+  }
+  .price-updated-badge.show { display: block; }
+
+  #screen-stockcount { display: none; }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===================== SUPPLIER PICKER SCREEN ===================== -->
+  <div id="screen-suppliers">
+    <header>
+      <div class="header-row">
+        <div>
+          <div class="brand"><span class="fen">Fen</span><span class="meat">Meat</span></div>
+          <div class="brand-sub">Supplier Orders</div>
+        </div>
+        <div class="today-date" id="today-date-label"></div>
+      </div>
+    </header>
+    <main>
+      <div id="suppliers-content" class="loading">Loading suppliers…</div>
+    </main>
+  </div>
+
+  <!-- ===================== STOCK COUNT SCREEN ===================== -->
+  <div id="screen-stockcount">
+    <header>
+      <button class="back-btn" id="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Suppliers
+      </button>
+      <div class="header-row" style="margin-top:6px;">
+        <div>
+          <div class="brand" style="font-size:19px;"><span id="sc-supplier-name">—</span></div>
+          <div class="brand-sub" style="text-transform:none; letter-spacing:0.3px;">Stock Count</div>
+        </div>
+        <div class="today-date" id="sc-date-label"></div>
+      </div>
+    </header>
+    <main>
+      <div id="stockcount-content" class="loading">Loading raw materials…</div>
+    </main>
+    <div class="bottom-bar">
+      <button class="save-btn" id="save-btn">Save Count</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzOvHW0qLnNQUP_kgImFdAXNcU7SMDsA6vYOFfeyyuBrs7j4MOrtWBgvoMv8Wba_A1yYw/exec';
+
+  // ---------- Date helpers (GMT+2, matches Apps Script backend) ----------
+  function todayISO() {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Africa/Johannesburg', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(new Date());
+    const map = {};
+    parts.forEach(p => map[p.type] = p.value);
+    return `${map.year}-${map.month}-${map.day}`;
+  }
+  function todayDisplay() {
+    return new Date().toLocaleDateString('en-GB', {
+      timeZone: 'Africa/Johannesburg', weekday: 'short', day: 'numeric', month: 'short'
+    });
+  }
+
+  // ---------- Network helpers ----------
+  async function apiGet(action, params) {
+    const url = new URL(SCRIPT_URL);
+    url.searchParams.set('action', action);
+    Object.keys(params || {}).forEach(k => url.searchParams.set(k, params[k]));
+    const res = await fetch(url.toString());
+    return res.json();
+  }
+  async function apiPost(action, body) {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action, ...body })
+    });
+    return res.json();
+  }
+
+  // ---------- Toast ----------
+  let toastTimer;
+  function showToast(msg, isError) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.toggle('error', !!isError);
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+  }
+
+  // ---------- State ----------
+  let currentSupplier = null;
+  let currentMaterials = [];
+
+  // ---------- Screen switching ----------
+  function showScreen(name) {
+    document.getElementById('screen-suppliers').style.display = name === 'suppliers' ? 'flex' : 'none';
+    document.getElementById('screen-stockcount').style.display = name === 'stockcount' ? 'flex' : 'none';
+    document.getElementById('screen-suppliers').style.flexDirection = 'column';
+    document.getElementById('screen-stockcount').style.flexDirection = 'column';
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- Supplier Picker ----------
+  async function loadSuppliers() {
+    document.getElementById('today-date-label').textContent = todayDisplay();
+    const contentEl = document.getElementById('suppliers-content');
+    try {
+      const data = await apiGet('getSuppliers');
+      if (data.status !== 'ok') throw new Error(data.message || 'Failed to load suppliers');
+
+      const due = data.suppliers.filter(s => s.dueToday);
+      const notDue = data.suppliers.filter(s => !s.dueToday);
+
+      let html = '';
+      if (due.length > 0) {
+        html += `<div class="section-label">Order today</div>`;
+        due.forEach(s => { html += supplierCardHTML(s, true); });
+      }
+      html += `<div class="section-label">${due.length > 0 ? 'Other suppliers' : 'All suppliers'}</div>`;
+      notDue.forEach(s => { html += supplierCardHTML(s, false); });
+
+      contentEl.className = '';
+      contentEl.innerHTML = html;
+
+      document.querySelectorAll('.supplier-card').forEach(card => {
+        card.addEventListener('click', () => openSupplier(card.dataset.name));
+      });
+    } catch (err) {
+      contentEl.className = 'empty-state';
+      contentEl.textContent = 'Could not load suppliers. Check your connection and try again.';
+    }
+  }
+
+  function supplierCardHTML(s, isDue) {
+    return `
+      <div class="supplier-card ${isDue ? 'due' : 'quiet'}" data-name="${escapeHtml(s.name)}">
+        <div class="supplier-info">
+          <div class="supplier-name">${escapeHtml(s.name)}</div>
+          <div class="supplier-meta">${escapeHtml(s.deliveryDays)} · ${escapeHtml(s.frequency)}</div>
+        </div>
+        ${isDue
+          ? `<div class="due-tag">Order today</div>`
+          : `<svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`
+        }
+      </div>`;
+  }
+
+  function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // ---------- Stock Count ----------
+  async function openSupplier(name) {
+    currentSupplier = name;
+    document.getElementById('sc-supplier-name').textContent = name;
+    document.getElementById('sc-date-label').textContent = todayDisplay();
+    showScreen('stockcount');
+
+    const contentEl = document.getElementById('stockcount-content');
+    contentEl.className = 'loading';
+    contentEl.textContent = 'Loading raw materials…';
+
+    try {
+      const data = await apiGet('getSupplierRawMaterials', { supplier: name });
+      if (data.status !== 'ok') throw new Error(data.message || 'Failed to load materials');
+
+      currentMaterials = data.materials;
+
+      if (currentMaterials.length === 0) {
+        contentEl.className = 'empty-state';
+        contentEl.textContent = 'No raw materials found for this supplier yet.';
+        return;
+      }
+
+      contentEl.className = '';
+      contentEl.innerHTML = currentMaterials.map((m, i) => materialRowHTML(m, i)).join('');
+    } catch (err) {
+      contentEl.className = 'empty-state';
+      contentEl.textContent = 'Could not load raw materials. Check your connection and try again.';
+    }
+  }
+
+  function materialRowHTML(m, idx) {
+    return `
+      <div class="material-row" data-idx="${idx}">
+        <div class="material-top">
+          <div>
+            <div class="material-name">${escapeHtml(m.name)}</div>
+            <div class="material-cat">${escapeHtml(m.category)}</div>
+          </div>
+        </div>
+        <div class="material-fields">
+          <div class="field-block">
+            <div class="field-label">Qty counted</div>
+            <input type="number" inputmode="decimal" class="qty-input" data-idx="${idx}" placeholder="0" min="0" step="any">
+            <div class="unit-hint">${escapeHtml(m.unit)}${m.minStock ? ' · min stock ' + m.minStock : ''}</div>
+          </div>
+          <div class="field-block">
+            <div class="field-label">Price / ${escapeHtml(m.unit)}</div>
+            <div class="price-wrap">
+              <span class="currency-r">R</span>
+              <input type="number" inputmode="decimal" class="price-input" data-idx="${idx}" value="${m.currentPrice || ''}" step="0.01" min="0">
+            </div>
+            <div class="price-updated-badge" data-idx="${idx}">Price updated</div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // Flag a price row as changed (visual confirmation only — actual save happens on Save Count)
+  document.addEventListener('input', (e) => {
+    if (e.target.classList.contains('price-input')) {
+      const idx = e.target.dataset.idx;
+      const original = currentMaterials[idx] ? currentMaterials[idx].currentPrice : null;
+      const badge = document.querySelector(`.price-updated-badge[data-idx="${idx}"]`);
+      if (badge) {
+        const changed = parseFloat(e.target.value) !== parseFloat(original);
+        badge.classList.toggle('show', changed && e.target.value !== '');
+      }
+    }
+  });
+
+  async function saveStockCount() {
+    if (!currentSupplier || currentMaterials.length === 0) return;
+
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    const rows = currentMaterials.map((m, i) => {
+      const qtyEl = document.querySelector(`.qty-input[data-idx="${i}"]`);
+      const priceEl = document.querySelector(`.price-input[data-idx="${i}"]`);
+      return {
+        rmCode: m.rmCode,
+        name: m.name,
+        qtyCounted: qtyEl && qtyEl.value !== '' ? Number(qtyEl.value) : 0,
+        price: priceEl && priceEl.value !== '' ? Number(priceEl.value) : ''
+      };
+    });
+
+    try {
+      const data = await apiPost('writeRawStockCount', {
+        date: todayISO(),
+        supplier: currentSupplier,
+        rows
+      });
+      if (data.status !== 'ok') throw new Error(data.message || 'Save failed');
+
+      showToast(`Saved · ${data.saved} items` + (data.pricesUpdated ? ` · ${data.pricesUpdated} prices updated` : ''));
+      setTimeout(() => showScreen('suppliers'), 700);
+    } catch (err) {
+      showToast('Could not save. Try again.', true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save Count';
+    }
+  }
+
+  // ---------- Wire up ----------
+  document.getElementById('back-btn').addEventListener('click', () => showScreen('suppliers'));
+  document.getElementById('save-btn').addEventListener('click', saveStockCount);
+
+  // ---------- Init ----------
+  showScreen('suppliers');
+  loadSuppliers();
+</script>
+
+</body>
+</html>
