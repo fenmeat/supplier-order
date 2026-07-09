@@ -562,6 +562,131 @@
   .summary-banner.ok { background: #ECFDF3; color: var(--green); border: 2px solid var(--green); }
   .summary-banner.diff { background: #FEF3E7; color: var(--amber); border: 2px solid var(--amber); }
 
+  /* ---------- Credit Note ---------- */
+  .generate-cn-btn {
+    width: 100%;
+    background: var(--red);
+    color: var(--white);
+    border: none;
+    border-radius: 14px;
+    padding: 15px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 16px;
+  }
+
+  .cn-row {
+    background: var(--platinum);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .cn-row-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+  .cn-checkbox { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--red); flex-shrink: 0; }
+  .cn-row-info { flex: 1; }
+  .cn-row-status { font-size: 11px; color: var(--charcoal); opacity: 0.55; margin-top: 2px; }
+  .cn-amount-field { display: flex; flex-direction: column; gap: 4px; }
+  .cn-amount-input {
+    width: 100%;
+    border: 2px solid var(--red);
+    border-radius: 10px;
+    background: var(--white);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    color: var(--red);
+    padding: 9px 10px;
+    font-size: 16px;
+  }
+  .cn-amount-input:focus { outline: none; }
+
+  .cn-total-banner {
+    background: var(--charcoal);
+    color: var(--white);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin: 16px 0;
+  }
+
+  /* ---------- Dashboard ---------- */
+  .dashboard-icon-btn {
+    background: none;
+    border: none;
+    color: var(--white);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+  }
+  .dashboard-icon-btn svg { width: 24px; height: 24px; }
+
+  .kpi-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .kpi-tab {
+    flex: 1;
+    background: var(--platinum);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 10px 6px;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--charcoal);
+    cursor: pointer;
+  }
+  .kpi-tab.active { background: #EAF0FF; border-color: var(--royal-blue); color: var(--royal-blue); }
+
+  .kpi-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .kpi-card {
+    background: var(--charcoal);
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .kpi-card-label { font-size: 12px; color: var(--silver); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+  .kpi-card-value { font-size: 22px; color: var(--white); font-weight: 700; margin-top: 2px; }
+  .kpi-card-sub { font-size: 11px; color: var(--silver); margin-top: 2px; }
+  .kpi-card.credit .kpi-card-value { color: #FCA5A5; }
+
+  .compliance-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--platinum);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+  }
+  .compliance-status {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    color: var(--white);
+  }
+  .compliance-status.done { background: var(--green); }
+  .compliance-status.pending { background: var(--amber); }
+
+  .rank-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--silver);
+  }
+  .rank-row:last-child { border-bottom: none; }
+  .rank-name { font-size: 14.5px; font-weight: 600; color: var(--charcoal); }
+  .rank-sub { font-size: 12px; color: var(--charcoal); opacity: 0.55; margin-top: 2px; }
+  .rank-value { font-size: 15px; font-weight: 700; color: var(--royal-blue); }
+
   /* ---------- Bottom action bar ---------- */
   .bottom-bar {
     position: fixed;
@@ -647,7 +772,12 @@
           <div class="brand"><span class="fen">Fen</span><span class="meat">Meat</span></div>
           <div class="brand-sub">Supplier Orders</div>
         </div>
-        <div class="today-date" id="today-date-label"></div>
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div class="today-date" id="today-date-label"></div>
+          <button class="dashboard-icon-btn" id="dashboard-btn" title="Dashboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          </button>
+        </div>
       </div>
     </header>
     <main>
@@ -741,6 +871,44 @@
     </div>
   </div>
 
+  <!-- ===================== CREDIT NOTE SCREEN ===================== -->
+  <div id="screen-cn">
+    <header>
+      <button class="back-btn" id="back-btn-cn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Invoice Check
+      </button>
+      <div class="header-row" style="margin-top:6px;">
+        <div>
+          <div class="brand" style="font-size:19px;">Credit Note</div>
+          <div class="brand-sub" style="text-transform:none; letter-spacing:0.3px;" id="cn-supplier-label">—</div>
+        </div>
+      </div>
+    </header>
+    <main>
+      <div id="cn-content" class="loading">Loading…</div>
+    </main>
+  </div>
+
+  <!-- ===================== DASHBOARD SCREEN ===================== -->
+  <div id="screen-dashboard">
+    <header>
+      <button class="back-btn" id="back-btn-dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Suppliers
+      </button>
+      <div class="header-row" style="margin-top:6px;">
+        <div>
+          <div class="brand" style="font-size:19px;">Dashboard</div>
+          <div class="brand-sub" style="text-transform:none; letter-spacing:0.3px;">Raw material overview</div>
+        </div>
+      </div>
+    </header>
+    <main>
+      <div id="dashboard-content" class="loading">Loading dashboard…</div>
+    </main>
+  </div>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -800,10 +968,14 @@
   let suppliersMap = {};
   let invoicePhotoUrl = '';
   let invoiceRows = []; // {rmCode, name, poQty, poPrice, isExtra}
+  let lastComparisonItems = [];
+  let currentCN = null;
+  let dashboardData = null;
+  let activeKpiPeriod = 'today';
 
   // ---------- Screen switching ----------
   function showScreen(name) {
-    const screens = ['suppliers', 'stockcount', 'needs', 'po', 'invoice'];
+    const screens = ['suppliers', 'stockcount', 'needs', 'po', 'invoice', 'cn', 'dashboard'];
     screens.forEach(s => {
       const el = document.getElementById('screen-' + s);
       el.style.display = (s === name) ? 'flex' : 'none';
@@ -1427,6 +1599,7 @@
   }
 
   function renderComparisonResults(items, hasDiscrepancy) {
+    lastComparisonItems = items;
     const resultsEl = document.getElementById('compare-results');
     const banner = hasDiscrepancy
       ? `<div class="summary-banner diff">${items.filter(it => it.status !== 'MATCH').length} difference(s) found</div>`
@@ -1446,8 +1619,311 @@
         </div>
       </div>`).join('');
 
-    resultsEl.innerHTML = banner + rows;
+    const cnButton = hasDiscrepancy
+      ? `<button class="generate-cn-btn" id="generate-cn-btn">Generate Credit Note</button>`
+      : '';
+
+    resultsEl.innerHTML = banner + rows + cnButton;
     resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    const cnBtn = document.getElementById('generate-cn-btn');
+    if (cnBtn) cnBtn.addEventListener('click', openCreditNoteBuilder);
+  }
+
+  // ---------- Credit Note ----------
+  function suggestedCredit(item) {
+    if (item.status === 'PRICE_DIFF' || item.status === 'BOTH_DIFF') {
+      if (item.invoicePrice != null && item.invoicePrice > item.poPrice && item.invoiceQty != null) {
+        return Math.round((item.invoicePrice - item.poPrice) * item.invoiceQty * 100) / 100;
+      }
+      return 0;
+    }
+    if (item.status === 'EXTRA_ON_INVOICE') {
+      return Math.round((item.invoiceQty || 0) * (item.invoicePrice || 0) * 100) / 100;
+    }
+    return 0; // QTY_DIFF / MISSING_ON_INVOICE — Alex decides manually
+  }
+
+  function openCreditNoteBuilder() {
+    document.getElementById('cn-supplier-label').textContent = currentSupplier;
+    showScreen('cn');
+
+    const discrepant = lastComparisonItems.filter(it => it.status !== 'MATCH');
+    const contentEl = document.getElementById('cn-content');
+
+    if (discrepant.length === 0) {
+      contentEl.className = 'empty-state';
+      contentEl.textContent = 'No discrepancies to credit.';
+      return;
+    }
+
+    contentEl.className = '';
+    contentEl.innerHTML = `
+      <div class="section-label">Select items to credit</div>
+      <div id="cn-rows">${discrepant.map((it, i) => cnRowHTML(it, i)).join('')}</div>
+      <div class="cn-total-banner">
+        <div class="po-total-label">Credit total</div>
+        <div class="po-total" id="cn-running-total">R0.00</div>
+      </div>
+      <button class="save-btn" id="create-cn-btn">Create Credit Note</button>
+    `;
+
+    document.querySelectorAll('.cn-checkbox, .cn-amount-input').forEach(el => {
+      el.addEventListener('input', updateCNRunningTotal);
+      el.addEventListener('change', updateCNRunningTotal);
+    });
+    updateCNRunningTotal();
+    document.getElementById('create-cn-btn').addEventListener('click', () => createCreditNoteFromBuilder(discrepant));
+  }
+
+  function cnRowHTML(it, idx) {
+    const suggested = suggestedCredit(it);
+    const checked = suggested > 0;
+    return `
+      <div class="cn-row">
+        <div class="cn-row-top">
+          <input type="checkbox" class="cn-checkbox" data-idx="${idx}" ${checked ? 'checked' : ''}>
+          <div class="cn-row-info">
+            <div class="material-name">${escapeHtml(it.name)}</div>
+            <div class="cn-row-status">${statusLabel(it.status)} · PO R${it.poPrice.toFixed(2)} → Invoice R${it.invoicePrice != null ? it.invoicePrice.toFixed(2) : '—'}</div>
+          </div>
+        </div>
+        <div class="cn-amount-field">
+          <div class="field-label">Credit amount (R)</div>
+          <input type="number" inputmode="decimal" class="cn-amount-input" data-idx="${idx}" value="${suggested}" step="0.01" min="0">
+        </div>
+      </div>`;
+  }
+
+  function updateCNRunningTotal() {
+    let total = 0;
+    document.querySelectorAll('.cn-checkbox').forEach(cb => {
+      if (cb.checked) {
+        const amt = document.querySelector(`.cn-amount-input[data-idx="${cb.dataset.idx}"]`);
+        total += amt ? (Number(amt.value) || 0) : 0;
+      }
+    });
+    document.getElementById('cn-running-total').textContent = 'R' + total.toFixed(2);
+  }
+
+  async function createCreditNoteFromBuilder(discrepant) {
+    const rows = [];
+    document.querySelectorAll('.cn-checkbox').forEach(cb => {
+      if (!cb.checked) return;
+      const idx = cb.dataset.idx;
+      const it = discrepant[idx];
+      const amtEl = document.querySelector(`.cn-amount-input[data-idx="${idx}"]`);
+      const creditAmount = amtEl ? (Number(amtEl.value) || 0) : 0;
+      if (creditAmount <= 0) return;
+      rows.push({
+        rmCode: it.rmCode, name: it.name, status: it.status,
+        poQty: it.poQty, poPrice: it.poPrice, invoiceQty: it.invoiceQty, invoicePrice: it.invoicePrice,
+        creditAmount: creditAmount
+      });
+    });
+
+    if (rows.length === 0) {
+      showToast('Select at least one item with a credit amount above 0.', true);
+      return;
+    }
+
+    const btn = document.getElementById('create-cn-btn');
+    btn.disabled = true;
+    btn.textContent = 'Creating…';
+
+    try {
+      const data = await apiPost('createCreditNote', {
+        date: todayISO(), supplier: currentSupplier, poNumber: currentPO.poNumber, items: rows
+      });
+      if (data.status !== 'ok') throw new Error(data.message);
+      currentCN = data;
+      renderCNSummary(data);
+    } catch (err) {
+      showToast('Could not create credit note.', true);
+      btn.disabled = false;
+      btn.textContent = 'Create Credit Note';
+    }
+  }
+
+  function buildCNMessage(cn) {
+    const lines = cn.items.map(it => `- ${it.name}: R${Number(it.creditAmount).toFixed(2)} (${statusLabel(it.status)})`);
+    return `FenMeat Credit Note ${cn.cnNumber}\nSupplier: ${cn.supplier}\nRelated PO: ${cn.poNumber}\nDate: ${cn.date}\n\nItems:\n${lines.join('\n')}\n\nTotal credit due: R${cn.total.toFixed(2)}`;
+  }
+
+  function renderCNSummary(cn) {
+    const contentEl = document.getElementById('cn-content');
+    const linesHTML = cn.items.map(it => `
+      <div class="po-line">
+        <div>
+          <div class="po-line-name">${escapeHtml(it.name)}</div>
+          <div class="po-line-qty">${statusLabel(it.status)}</div>
+        </div>
+        <div class="po-line-value">R${Number(it.creditAmount).toFixed(2)}</div>
+      </div>`).join('');
+
+    const hasPhone = !!currentSupplierContact.phone;
+    const hasEmail = !!currentSupplierContact.email;
+
+    contentEl.innerHTML = `
+      <div class="po-banner">
+        <div class="po-number">${escapeHtml(cn.cnNumber)}</div>
+        <div class="po-total-label">Credit total</div>
+        <div class="po-total">R${cn.total.toFixed(2)}</div>
+      </div>
+      <div class="section-label">Items</div>
+      <div class="po-lines">${linesHTML}</div>
+      <div class="section-label">Send this credit note</div>
+      <div class="send-buttons">
+        <button class="send-btn whatsapp" id="cn-send-whatsapp-btn" ${hasPhone ? '' : 'disabled'}>Send via WhatsApp</button>
+        <button class="send-btn email" id="cn-send-email-btn" ${hasEmail ? '' : 'disabled'}>Send via Email</button>
+      </div>
+      <div class="send-hint">Also sets a Google Calendar follow-up reminder for 3 days from now.</div>
+      <div id="cn-status-pill"></div>
+    `;
+
+    const waBtn = document.getElementById('cn-send-whatsapp-btn');
+    const emailBtn = document.getElementById('cn-send-email-btn');
+    if (waBtn) waBtn.addEventListener('click', () => sendCN('whatsapp'));
+    if (emailBtn) emailBtn.addEventListener('click', () => sendCN('email'));
+  }
+
+  async function sendCN(channel) {
+    if (!currentCN) return;
+    const message = buildCNMessage(currentCN);
+
+    if (channel === 'whatsapp') {
+      const phone = toWhatsAppPhone(currentSupplierContact.phone);
+      if (!phone) { showToast('Add a phone number first.', true); return; }
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+    } else {
+      const email = currentSupplierContact.email;
+      if (!email) { showToast('Add an email address first.', true); return; }
+      const subject = `FenMeat Credit Note ${currentCN.cnNumber}`;
+      window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+    }
+
+    try {
+      const data = await apiPost('markCreditNoteSent', {
+        cnNumber: currentCN.cnNumber, channel: channel, supplier: currentSupplier,
+        total: currentCN.total, followUpDays: 3
+      });
+      const pill = document.getElementById('cn-status-pill');
+      if (pill) {
+        pill.innerHTML = `<div class="status-pill">Sent via ${channel === 'whatsapp' ? 'WhatsApp' : 'Email'}</div>` +
+          (data.reminderCreated ? `<div class="status-pill" style="background:var(--royal-blue); margin-left:6px;">Reminder set for 3 days</div>` : '');
+      }
+    } catch (err) {
+      // sending already happened client-side; silently ignore reminder failure
+    }
+  }
+
+  // ---------- Dashboard ----------
+  async function openDashboard() {
+    showScreen('dashboard');
+    const contentEl = document.getElementById('dashboard-content');
+    contentEl.className = 'loading';
+    contentEl.textContent = 'Loading dashboard…';
+
+    try {
+      const data = await apiGet('getDashboardSummary');
+      if (data.status !== 'ok') throw new Error(data.message);
+      dashboardData = data;
+      activeKpiPeriod = 'today';
+      contentEl.className = '';
+      contentEl.innerHTML = dashboardHTML(data);
+      wireDashboard(data);
+    } catch (err) {
+      contentEl.className = 'empty-state';
+      contentEl.textContent = 'Could not load dashboard. Check your connection and try again.';
+    }
+  }
+
+  function dashboardHTML(data) {
+    const pending = data.suppliersDueToday.filter(s => !s.stockCounted);
+    const done = data.suppliersDueToday.filter(s => s.stockCounted);
+
+    return `
+      <div class="kpi-tabs">
+        <div class="kpi-tab active" data-period="today">Today</div>
+        <div class="kpi-tab" data-period="week">This Week</div>
+        <div class="kpi-tab" data-period="month">This Month</div>
+      </div>
+      <div id="kpi-cards"></div>
+
+      ${data.suppliersDueToday.length > 0 ? `
+        <div class="section-label">Order day compliance</div>
+        ${pending.map(s => `
+          <div class="compliance-row">
+            <div class="supplier-name" style="font-size:15px;">${escapeHtml(s.name)}</div>
+            <div class="compliance-status pending">Not counted yet</div>
+          </div>`).join('')}
+        ${done.map(s => `
+          <div class="compliance-row">
+            <div class="supplier-name" style="font-size:15px;">${escapeHtml(s.name)}</div>
+            <div class="compliance-status done">Counted ✓</div>
+          </div>`).join('')}
+      ` : ''}
+
+      ${data.topIngredientsMonth.length > 0 ? `
+        <div class="section-label">Top ingredients this month</div>
+        <div class="material-row">
+          ${data.topIngredientsMonth.map(it => `
+            <div class="rank-row">
+              <div>
+                <div class="rank-name">${escapeHtml(it.name)}</div>
+                <div class="rank-sub">${it.totalQty} units ordered</div>
+              </div>
+              <div class="rank-value">R${it.totalSpend.toFixed(2)}</div>
+            </div>`).join('')}
+        </div>
+      ` : ''}
+
+      ${data.supplierBreakdownMonth.length > 0 ? `
+        <div class="section-label">Supplier spend this month</div>
+        <div class="material-row">
+          ${data.supplierBreakdownMonth.map(s => `
+            <div class="rank-row">
+              <div>
+                <div class="rank-name">${escapeHtml(s.supplier)}</div>
+                <div class="rank-sub">${s.poCount} order${s.poCount === 1 ? '' : 's'}</div>
+              </div>
+              <div class="rank-value">R${s.totalSpend.toFixed(2)}</div>
+            </div>`).join('')}
+        </div>
+      ` : ''}
+    `;
+  }
+
+  function kpiCardsHTML(bucket) {
+    return `
+      <div class="kpi-cards">
+        <div class="kpi-card">
+          <div>
+            <div class="kpi-card-label">Raw material spend</div>
+            <div class="kpi-card-value">R${bucket.totalSpend.toFixed(2)}</div>
+          </div>
+          <div class="kpi-card-sub">${bucket.poCount} order${bucket.poCount === 1 ? '' : 's'}</div>
+        </div>
+        <div class="kpi-card credit">
+          <div>
+            <div class="kpi-card-label">Credit notes issued</div>
+            <div class="kpi-card-value">R${bucket.creditValue.toFixed(2)}</div>
+          </div>
+          <div class="kpi-card-sub">${bucket.creditCount} note${bucket.creditCount === 1 ? '' : 's'}</div>
+        </div>
+      </div>`;
+  }
+
+  function wireDashboard(data) {
+    document.getElementById('kpi-cards').innerHTML = kpiCardsHTML(data[activeKpiPeriod]);
+    document.querySelectorAll('.kpi-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.kpi-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeKpiPeriod = tab.dataset.period;
+        document.getElementById('kpi-cards').innerHTML = kpiCardsHTML(data[activeKpiPeriod]);
+      });
+    });
   }
 
   // ---------- Wire up ----------
@@ -1458,6 +1934,9 @@
   document.getElementById('back-btn-po').addEventListener('click', () => showScreen('needs'));
   document.getElementById('back-btn-invoice').addEventListener('click', () => showScreen('po'));
   document.getElementById('compare-btn').addEventListener('click', runInvoiceComparison);
+  document.getElementById('back-btn-cn').addEventListener('click', () => showScreen('invoice'));
+  document.getElementById('dashboard-btn').addEventListener('click', openDashboard);
+  document.getElementById('back-btn-dashboard').addEventListener('click', () => showScreen('suppliers'));
 
   // ---------- Init ----------
   showScreen('suppliers');
