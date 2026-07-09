@@ -448,6 +448,120 @@
     font-weight: 500;
   }
 
+  /* ---------- Invoice Check ---------- */
+  .check-invoice-btn {
+    width: 100%;
+    background: var(--white);
+    color: var(--royal-blue);
+    border: 2px solid var(--royal-blue);
+    border-radius: 14px;
+    padding: 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin: 18px 0;
+  }
+
+  .photo-capture-btn {
+    width: 100%;
+    background: var(--charcoal);
+    color: var(--white);
+    border: none;
+    border-radius: 14px;
+    padding: 15px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .photo-preview {
+    width: 100%;
+    border-radius: 14px;
+    margin: 12px 0;
+    display: block;
+  }
+  .photo-status {
+    font-size: 13px;
+    text-align: center;
+    color: var(--charcoal);
+    opacity: 0.6;
+    margin: 8px 0 4px;
+  }
+
+  .compare-row {
+    background: var(--platinum);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border-left: 5px solid var(--silver);
+  }
+  .compare-row.status-match { border-left-color: var(--green); }
+  .compare-row.status-qty, .compare-row.status-price, .compare-row.status-both { border-left-color: var(--amber); }
+  .compare-row.status-missing { border-left-color: var(--red); }
+  .compare-row.status-extra { border-left-color: var(--royal-blue); }
+
+  .compare-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .compare-po-info { font-size: 12px; color: var(--charcoal); opacity: 0.6; margin-top: 2px; }
+  .status-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 10px;
+    color: var(--white);
+    white-space: nowrap;
+  }
+  .status-badge.match { background: var(--green); }
+  .status-badge.qty, .status-badge.price, .status-badge.both { background: var(--amber); }
+  .status-badge.missing { background: var(--red); }
+  .status-badge.extra { background: var(--royal-blue); }
+
+  .compare-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .compare-input {
+    width: 100%;
+    border: 2px solid var(--silver);
+    border-radius: 10px;
+    background: var(--white);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: var(--charcoal);
+    padding: 9px 10px;
+    font-size: 15px;
+  }
+  .compare-input:focus { outline: none; border-color: var(--royal-blue); }
+
+  .add-extra-btn {
+    width: 100%;
+    background: none;
+    border: 2px dashed var(--silver);
+    border-radius: 14px;
+    padding: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--charcoal);
+    opacity: 0.7;
+    cursor: pointer;
+    margin-bottom: 14px;
+  }
+
+  .summary-banner {
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .summary-banner.ok { background: #ECFDF3; color: var(--green); border: 2px solid var(--green); }
+  .summary-banner.diff { background: #FEF3E7; color: var(--amber); border: 2px solid var(--amber); }
+
   /* ---------- Bottom action bar ---------- */
   .bottom-bar {
     position: fixed;
@@ -605,6 +719,28 @@
     </main>
   </div>
 
+  <!-- ===================== INVOICE CHECK SCREEN ===================== -->
+  <div id="screen-invoice">
+    <header>
+      <button class="back-btn" id="back-btn-invoice">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Purchase Order
+      </button>
+      <div class="header-row" style="margin-top:6px;">
+        <div>
+          <div class="brand" style="font-size:19px;">Invoice Check</div>
+          <div class="brand-sub" style="text-transform:none; letter-spacing:0.3px;" id="invoice-po-label">—</div>
+        </div>
+      </div>
+    </header>
+    <main>
+      <div id="invoice-content" class="loading">Loading…</div>
+    </main>
+    <div class="bottom-bar">
+      <button class="save-btn" id="compare-btn">Compare Invoice</button>
+    </div>
+  </div>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -662,10 +798,12 @@
   let currentPO = null;
   let currentSupplierContact = { phone: '', email: '' };
   let suppliersMap = {};
+  let invoicePhotoUrl = '';
+  let invoiceRows = []; // {rmCode, name, poQty, poPrice, isExtra}
 
   // ---------- Screen switching ----------
   function showScreen(name) {
-    const screens = ['suppliers', 'stockcount', 'needs', 'po'];
+    const screens = ['suppliers', 'stockcount', 'needs', 'po', 'invoice'];
     screens.forEach(s => {
       const el = document.getElementById('screen-' + s);
       el.style.display = (s === name) ? 'flex' : 'none';
@@ -1027,6 +1165,8 @@
       <textarea class="note-input" id="new-note-input" placeholder="e.g. Salt is short, supplier said Tuesday instead"></textarea>
       <button class="add-note-btn" id="add-note-btn">Add Note</button>
       <div id="notes-list" style="margin-top:14px;"></div>
+
+      <button class="check-invoice-btn" id="check-invoice-btn">Check Invoice Against This PO</button>
     `;
   }
 
@@ -1037,6 +1177,7 @@
     if (waBtn) waBtn.addEventListener('click', () => sendPO('whatsapp'));
     if (emailBtn) emailBtn.addEventListener('click', () => sendPO('email'));
     document.getElementById('add-note-btn').addEventListener('click', addSupplierNote);
+    document.getElementById('check-invoice-btn').addEventListener('click', () => openInvoiceCheck(currentPO));
     loadSupplierNotes();
   }
 
@@ -1142,12 +1283,181 @@
     if (pill) pill.innerHTML = `<div class="status-pill">Sent via ${channel === 'whatsapp' ? 'WhatsApp' : 'Email'}</div>`;
   }
 
+  // ---------- Invoice Check ----------
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function openInvoiceCheck(po) {
+    if (!po) return;
+    invoicePhotoUrl = '';
+    invoiceRows = po.items.map(li => ({
+      rmCode: li.rmCode, name: li.name, poQty: li.qty, poPrice: li.price, isExtra: false
+    }));
+
+    document.getElementById('invoice-po-label').textContent = po.poNumber;
+    showScreen('invoice');
+    renderInvoiceScreen();
+  }
+
+  function renderInvoiceScreen() {
+    const contentEl = document.getElementById('invoice-content');
+    contentEl.className = '';
+    contentEl.innerHTML = `
+      <input type="file" accept="image/*" capture="environment" id="invoice-photo-input" style="display:none;">
+      <button class="photo-capture-btn" id="take-photo-btn">📷 Photograph Invoice</button>
+      <div id="photo-preview-area"></div>
+
+      <div class="section-label">Compare items</div>
+      <div id="compare-rows">${invoiceRows.map((r, i) => compareRowHTML(r, i)).join('')}</div>
+      <button class="add-extra-btn" id="add-extra-btn">+ Add item not on the PO</button>
+      <div id="compare-results"></div>
+    `;
+
+    document.getElementById('take-photo-btn').addEventListener('click', () => {
+      document.getElementById('invoice-photo-input').click();
+    });
+    document.getElementById('invoice-photo-input').addEventListener('change', handlePhotoSelected);
+    document.getElementById('add-extra-btn').addEventListener('click', addExtraInvoiceRow);
+  }
+
+  function compareRowHTML(r, idx) {
+    return `
+      <div class="compare-row" data-idx="${idx}" id="compare-row-${idx}">
+        <div class="compare-header">
+          <div>
+            <div class="material-name">${escapeHtml(r.name)}${r.isExtra ? '' : ''}</div>
+            <div class="compare-po-info">${r.isExtra ? 'Not on original PO' : 'PO: ' + r.poQty + ' @ R' + r.poPrice.toFixed(2)}</div>
+          </div>
+        </div>
+        <div class="compare-fields">
+          <div class="field-block">
+            <div class="field-label">Invoice qty</div>
+            <input type="number" inputmode="decimal" class="compare-input inv-qty" data-idx="${idx}" placeholder="0" step="any">
+          </div>
+          <div class="field-block">
+            <div class="field-label">Invoice price</div>
+            <input type="number" inputmode="decimal" class="compare-input inv-price" data-idx="${idx}" placeholder="0.00" step="0.01">
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function addExtraInvoiceRow() {
+    const name = prompt('Item name (as it appears on the invoice):');
+    if (!name || !name.trim()) return;
+    invoiceRows.push({ rmCode: '', name: name.trim(), poQty: 0, poPrice: 0, isExtra: true });
+    document.getElementById('compare-rows').innerHTML = invoiceRows.map((r, i) => compareRowHTML(r, i)).join('');
+  }
+
+  async function handlePhotoSelected(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const previewArea = document.getElementById('photo-preview-area');
+    previewArea.innerHTML = '<div class="photo-status">Uploading photo…</div>';
+
+    try {
+      const base64 = await fileToBase64(file);
+      const data = await apiPost('uploadInvoicePhoto', {
+        poNumber: currentPO.poNumber,
+        supplier: currentSupplier,
+        imageBase64: base64,
+        mimeType: file.type || 'image/jpeg'
+      });
+      if (data.status !== 'ok') throw new Error(data.message);
+      invoicePhotoUrl = data.fileUrl;
+      previewArea.innerHTML = `
+        <img class="photo-preview" src="${URL.createObjectURL(file)}" alt="Invoice photo">
+        <div class="photo-status">✓ Saved to Drive</div>`;
+    } catch (err) {
+      previewArea.innerHTML = '<div class="photo-status">Could not upload photo. Try again.</div>';
+    }
+  }
+
+  async function runInvoiceComparison() {
+    const btn = document.getElementById('compare-btn');
+    btn.disabled = true;
+    btn.textContent = 'Comparing…';
+
+    const items = invoiceRows.map((r, i) => {
+      const qtyEl = document.querySelector(`.inv-qty[data-idx="${i}"]`);
+      const priceEl = document.querySelector(`.inv-price[data-idx="${i}"]`);
+      return {
+        rmCode: r.rmCode,
+        name: r.name,
+        poQty: r.poQty,
+        poPrice: r.poPrice,
+        invoiceQty: qtyEl && qtyEl.value !== '' ? qtyEl.value : '',
+        invoicePrice: priceEl && priceEl.value !== '' ? priceEl.value : '',
+        isExtra: r.isExtra
+      };
+    });
+
+    try {
+      const data = await apiPost('compareInvoice', {
+        poNumber: currentPO.poNumber,
+        supplier: currentSupplier,
+        date: todayISO(),
+        invoicePhotoUrl: invoicePhotoUrl,
+        invoiceItems: items
+      });
+      if (data.status !== 'ok') throw new Error(data.message);
+      renderComparisonResults(data.items, data.hasDiscrepancy);
+    } catch (err) {
+      showToast('Could not compare invoice.', true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Compare Invoice';
+    }
+  }
+
+  function statusClass(status) {
+    return { MATCH: 'match', QTY_DIFF: 'qty', PRICE_DIFF: 'price', BOTH_DIFF: 'both',
+      MISSING_ON_INVOICE: 'missing', EXTRA_ON_INVOICE: 'extra' }[status] || '';
+  }
+  function statusLabel(status) {
+    return { MATCH: 'Match', QTY_DIFF: 'Qty differs', PRICE_DIFF: 'Price differs', BOTH_DIFF: 'Qty & price differ',
+      MISSING_ON_INVOICE: 'Missing on invoice', EXTRA_ON_INVOICE: 'Extra on invoice' }[status] || status;
+  }
+
+  function renderComparisonResults(items, hasDiscrepancy) {
+    const resultsEl = document.getElementById('compare-results');
+    const banner = hasDiscrepancy
+      ? `<div class="summary-banner diff">${items.filter(it => it.status !== 'MATCH').length} difference(s) found</div>`
+      : `<div class="summary-banner ok">✓ Everything matches</div>`;
+
+    const rows = items.map(it => `
+      <div class="compare-row status-${statusClass(it.status)}">
+        <div class="compare-header">
+          <div>
+            <div class="material-name">${escapeHtml(it.name)}</div>
+            <div class="compare-po-info">
+              ${it.status === 'EXTRA_ON_INVOICE' ? '' : 'PO: ' + it.poQty + ' @ R' + it.poPrice.toFixed(2) + ' &nbsp;·&nbsp; '}
+              Invoice: ${it.invoiceQty != null ? it.invoiceQty : '—'} @ R${it.invoicePrice != null ? it.invoicePrice.toFixed(2) : '—'}
+            </div>
+          </div>
+          <div class="status-badge ${statusClass(it.status)}">${statusLabel(it.status)}</div>
+        </div>
+      </div>`).join('');
+
+    resultsEl.innerHTML = banner + rows;
+    resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   // ---------- Wire up ----------
   document.getElementById('back-btn').addEventListener('click', () => showScreen('suppliers'));
   document.getElementById('save-btn').addEventListener('click', saveStockCount);
   document.getElementById('back-btn-needs').addEventListener('click', () => showScreen('stockcount'));
   document.getElementById('save-order-btn').addEventListener('click', saveOrderPlan);
   document.getElementById('back-btn-po').addEventListener('click', () => showScreen('needs'));
+  document.getElementById('back-btn-invoice').addEventListener('click', () => showScreen('po'));
+  document.getElementById('compare-btn').addEventListener('click', runInvoiceComparison);
 
   // ---------- Init ----------
   showScreen('suppliers');
