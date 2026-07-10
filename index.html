@@ -42,13 +42,15 @@
 
   /* ---------- Header ---------- */
   header {
-    padding: 18px 20px 14px;
+    padding: 16px 20px 14px;
     background: var(--charcoal);
     color: var(--white);
     position: sticky;
     top: 0;
     z-index: 10;
   }
+
+  .logo-img { height: 34px; display: block; }
 
   .brand {
     display: flex;
@@ -74,11 +76,11 @@
     align-items: center;
   }
 
-  .today-date {
-    font-size: 13px;
-    color: var(--silver);
-    font-weight: 500;
-  }
+  .header-titles { display: flex; align-items: center; gap: 12px; }
+
+  .today-date { font-size: 13px; color: var(--silver); font-weight: 500; }
+
+  .header-actions { display: flex; align-items: center; gap: 14px; }
 
   .back-btn {
     background: none;
@@ -93,6 +95,19 @@
     cursor: pointer;
   }
   .back-btn svg { width: 18px; height: 18px; }
+
+  .cancel-btn {
+    background: none;
+    border: none;
+    color: var(--silver);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+  }
+  .cancel-btn svg { width: 22px; height: 22px; }
+
+  .flow-header-top { display: flex; justify-content: space-between; align-items: center; }
 
   /* ---------- Main content ---------- */
   main {
@@ -112,6 +127,35 @@
   }
   .section-label:first-child { margin-top: 0; }
 
+  /* ---------- Bottom Tab Bar ---------- */
+  .tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 480px;
+    margin: 0 auto;
+    background: var(--white);
+    border-top: 1px solid var(--silver);
+    display: flex;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 20;
+  }
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 4px 8px;
+    cursor: pointer;
+    color: var(--charcoal);
+    opacity: 0.5;
+  }
+  .tab-item.active { color: var(--royal-blue); opacity: 1; }
+  .tab-item svg { width: 22px; height: 22px; }
+  .tab-item-label { font-size: 10.5px; font-weight: 600; }
+
   /* ---------- Supplier cards ---------- */
   .supplier-card {
     display: flex;
@@ -126,15 +170,8 @@
     transition: transform 0.08s ease, border-color 0.15s ease;
   }
   .supplier-card:active { transform: scale(0.98); }
-
-  .supplier-card.due {
-    background: #EAF0FF;
-    border-color: var(--royal-blue);
-  }
-
-  .supplier-card.quiet {
-    opacity: 0.55;
-  }
+  .supplier-card.due { background: #EAF0FF; border-color: var(--royal-blue); }
+  .supplier-card.quiet { opacity: 0.55; }
 
   .supplier-info { display: flex; flex-direction: column; gap: 3px; }
   .supplier-name { font-size: 17px; font-weight: 600; color: var(--charcoal); }
@@ -161,12 +198,7 @@
     padding: 14px 16px;
     margin-bottom: 10px;
   }
-  .material-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
-  }
+  .material-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
   .material-name { font-size: 15.5px; font-weight: 600; color: var(--charcoal); line-height: 1.3; }
   .material-cat {
     font-size: 11px;
@@ -177,12 +209,7 @@
     margin-top: 2px;
   }
 
-  .material-fields {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
+  .material-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .field-block { display: flex; flex-direction: column; gap: 4px; }
   .field-label {
     font-size: 11px;
@@ -193,7 +220,7 @@
     letter-spacing: 0.3px;
   }
 
-  .qty-input, .price-input {
+  .qty-input, .price-input, .order-qty-input, .compare-input, .cn-amount-input, .contact-input, .note-input {
     width: 100%;
     border: 2px solid var(--silver);
     border-radius: 10px;
@@ -203,14 +230,12 @@
     color: var(--charcoal);
     padding: 10px 10px;
     font-size: 17px;
-    text-align: left;
   }
-  .qty-input:focus, .price-input:focus {
+  .qty-input:focus, .price-input:focus, .order-qty-input:focus, .compare-input:focus, .cn-amount-input:focus, .contact-input:focus, .note-input:focus {
     outline: none;
     border-color: var(--royal-blue);
   }
   .price-input { font-size: 15px; }
-  .price-input::before { content: 'R'; }
 
   .price-wrap { position: relative; }
   .price-wrap .currency-r {
@@ -226,468 +251,9 @@
   }
   .price-wrap .price-input { padding-left: 24px; }
 
-  .unit-hint {
-    font-size: 12px;
-    color: var(--charcoal);
-    opacity: 0.5;
-    margin-top: 2px;
-  }
+  .unit-hint { font-size: 12px; color: var(--charcoal); opacity: 0.5; margin-top: 2px; }
 
-  /* ---------- Needs Calculator ---------- */
-  .window-banner {
-    background: #EAF0FF;
-    border: 2px solid var(--royal-blue);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 18px;
-  }
-  .window-banner-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--royal-blue);
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    margin-bottom: 4px;
-  }
-  .window-banner-dates {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--charcoal);
-  }
-
-  .needs-row {
-    background: var(--platinum);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-  }
-  .needs-row.manual {
-    background: #FFF7ED;
-  }
-  .needs-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
-  }
-  .manual-tag {
-    background: var(--amber);
-    color: var(--white);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    padding: 4px 8px;
-    border-radius: 10px;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-  .needs-fields {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
-  }
-  .needs-readonly {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--charcoal);
-    padding: 10px 0 0;
-  }
-  .needs-readonly.dim { opacity: 0.4; font-weight: 500; font-size: 14px; }
-  .order-qty-input {
-    width: 100%;
-    border: 2px solid var(--royal-blue);
-    border-radius: 10px;
-    background: var(--white);
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    color: var(--royal-blue);
-    padding: 10px 10px;
-    font-size: 17px;
-  }
-  .order-qty-input:focus { outline: none; border-color: var(--royal-blue-dark); }
-
-  /* ---------- Purchase Order screen ---------- */
-  .po-banner {
-    background: var(--charcoal);
-    color: var(--white);
-    border-radius: 14px;
-    padding: 16px 18px;
-    margin-bottom: 16px;
-  }
-  .po-number {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--silver);
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
-  .po-total {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--white);
-    margin-top: 4px;
-  }
-  .po-total-label { font-size: 12px; color: var(--silver); font-weight: 500; }
-
-  .po-line {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--silver);
-  }
-  .po-line:last-child { border-bottom: none; }
-  .po-line-name { font-size: 14.5px; font-weight: 600; color: var(--charcoal); }
-  .po-line-qty { font-size: 12.5px; color: var(--charcoal); opacity: 0.6; margin-top: 2px; }
-  .po-line-value { font-size: 15px; font-weight: 700; color: var(--charcoal); white-space: nowrap; }
-
-  .contact-card {
-    background: var(--platinum);
-    border-radius: 14px;
-    padding: 16px 18px;
-    margin: 18px 0;
-  }
-  .contact-fields { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
-  .contact-input {
-    width: 100%;
-    border: 2px solid var(--silver);
-    border-radius: 10px;
-    background: var(--white);
-    font-family: 'Poppins', sans-serif;
-    font-weight: 500;
-    color: var(--charcoal);
-    padding: 10px 12px;
-    font-size: 15px;
-  }
-  .contact-input:focus { outline: none; border-color: var(--royal-blue); }
-  .save-contact-btn {
-    background: var(--charcoal);
-    color: var(--white);
-    border: none;
-    border-radius: 10px;
-    padding: 10px;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    font-size: 13.5px;
-    cursor: pointer;
-    margin-top: 4px;
-  }
-
-  .send-buttons { display: flex; flex-direction: column; gap: 10px; }
-  .send-btn {
-    width: 100%;
-    border: none;
-    border-radius: 14px;
-    padding: 15px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 15.5px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  .send-btn.whatsapp { background: #25D366; color: var(--white); }
-  .send-btn.email { background: var(--royal-blue); color: var(--white); }
-  .send-btn:disabled { opacity: 0.4; cursor: default; }
-  .send-hint { font-size: 12px; color: var(--charcoal); opacity: 0.55; margin-top: 6px; text-align: center; }
-  .status-pill {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-    padding: 4px 10px;
-    border-radius: 20px;
-    background: var(--green);
-    color: var(--white);
-    margin-top: 8px;
-  }
-
-  /* ---------- Supplier Notes ---------- */
-  .note-input {
-    width: 100%;
-    border: 2px solid var(--silver);
-    border-radius: 10px;
-    background: var(--white);
-    font-family: 'Poppins', sans-serif;
-    font-weight: 500;
-    color: var(--charcoal);
-    padding: 10px 12px;
-    font-size: 14.5px;
-    resize: vertical;
-    min-height: 60px;
-  }
-  .note-input:focus { outline: none; border-color: var(--royal-blue); }
-  .add-note-btn {
-    background: var(--royal-blue);
-    color: var(--white);
-    border: none;
-    border-radius: 10px;
-    padding: 10px;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    font-size: 13.5px;
-    cursor: pointer;
-    margin-top: 8px;
-    width: 100%;
-  }
-  .note-item {
-    background: var(--platinum);
-    border-radius: 12px;
-    padding: 12px 14px;
-    margin-bottom: 8px;
-  }
-  .note-item-text { font-size: 14px; color: var(--charcoal); line-height: 1.4; }
-  .note-item-meta {
-    font-size: 11px;
-    color: var(--charcoal);
-    opacity: 0.5;
-    margin-top: 6px;
-    font-weight: 500;
-  }
-
-  /* ---------- Invoice Check ---------- */
-  .check-invoice-btn {
-    width: 100%;
-    background: var(--white);
-    color: var(--royal-blue);
-    border: 2px solid var(--royal-blue);
-    border-radius: 14px;
-    padding: 14px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    margin: 18px 0;
-  }
-
-  .photo-capture-btn {
-    width: 100%;
-    background: var(--charcoal);
-    color: var(--white);
-    border: none;
-    border-radius: 14px;
-    padding: 15px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  .photo-preview {
-    width: 100%;
-    border-radius: 14px;
-    margin: 12px 0;
-    display: block;
-  }
-  .photo-status {
-    font-size: 13px;
-    text-align: center;
-    color: var(--charcoal);
-    opacity: 0.6;
-    margin: 8px 0 4px;
-  }
-
-  .compare-row {
-    background: var(--platinum);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    border-left: 5px solid var(--silver);
-  }
-  .compare-row.status-match { border-left-color: var(--green); }
-  .compare-row.status-qty, .compare-row.status-price, .compare-row.status-both { border-left-color: var(--amber); }
-  .compare-row.status-missing { border-left-color: var(--red); }
-  .compare-row.status-extra { border-left-color: var(--royal-blue); }
-
-  .compare-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-  .compare-po-info { font-size: 12px; color: var(--charcoal); opacity: 0.6; margin-top: 2px; }
-  .status-badge {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-    padding: 4px 8px;
-    border-radius: 10px;
-    color: var(--white);
-    white-space: nowrap;
-  }
-  .status-badge.match { background: var(--green); }
-  .status-badge.qty, .status-badge.price, .status-badge.both { background: var(--amber); }
-  .status-badge.missing { background: var(--red); }
-  .status-badge.extra { background: var(--royal-blue); }
-
-  .compare-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .compare-input {
-    width: 100%;
-    border: 2px solid var(--silver);
-    border-radius: 10px;
-    background: var(--white);
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    color: var(--charcoal);
-    padding: 9px 10px;
-    font-size: 15px;
-  }
-  .compare-input:focus { outline: none; border-color: var(--royal-blue); }
-
-  .add-extra-btn {
-    width: 100%;
-    background: none;
-    border: 2px dashed var(--silver);
-    border-radius: 14px;
-    padding: 12px;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    font-size: 14px;
-    color: var(--charcoal);
-    opacity: 0.7;
-    cursor: pointer;
-    margin-bottom: 14px;
-  }
-
-  .summary-banner {
-    border-radius: 14px;
-    padding: 16px 18px;
-    margin-bottom: 16px;
-    text-align: center;
-    font-weight: 700;
-    font-size: 15px;
-  }
-  .summary-banner.ok { background: #ECFDF3; color: var(--green); border: 2px solid var(--green); }
-  .summary-banner.diff { background: #FEF3E7; color: var(--amber); border: 2px solid var(--amber); }
-
-  /* ---------- Credit Note ---------- */
-  .generate-cn-btn {
-    width: 100%;
-    background: var(--red);
-    color: var(--white);
-    border: none;
-    border-radius: 14px;
-    padding: 15px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 16px;
-  }
-
-  .cn-row {
-    background: var(--platinum);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-  }
-  .cn-row-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
-  .cn-checkbox { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--red); flex-shrink: 0; }
-  .cn-row-info { flex: 1; }
-  .cn-row-status { font-size: 11px; color: var(--charcoal); opacity: 0.55; margin-top: 2px; }
-  .cn-amount-field { display: flex; flex-direction: column; gap: 4px; }
-  .cn-amount-input {
-    width: 100%;
-    border: 2px solid var(--red);
-    border-radius: 10px;
-    background: var(--white);
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    color: var(--red);
-    padding: 9px 10px;
-    font-size: 16px;
-  }
-  .cn-amount-input:focus { outline: none; }
-
-  .cn-total-banner {
-    background: var(--charcoal);
-    color: var(--white);
-    border-radius: 14px;
-    padding: 16px 18px;
-    margin: 16px 0;
-  }
-
-  /* ---------- Dashboard ---------- */
-  .dashboard-icon-btn {
-    background: none;
-    border: none;
-    color: var(--white);
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-  }
-  .dashboard-icon-btn svg { width: 24px; height: 24px; }
-
-  .kpi-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-  .kpi-tab {
-    flex: 1;
-    background: var(--platinum);
-    border: 2px solid transparent;
-    border-radius: 12px;
-    padding: 10px 6px;
-    text-align: center;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    font-size: 13px;
-    color: var(--charcoal);
-    cursor: pointer;
-  }
-  .kpi-tab.active { background: #EAF0FF; border-color: var(--royal-blue); color: var(--royal-blue); }
-
-  .kpi-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
-  .kpi-card {
-    background: var(--charcoal);
-    border-radius: 14px;
-    padding: 16px 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .kpi-card-label { font-size: 12px; color: var(--silver); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
-  .kpi-card-value { font-size: 22px; color: var(--white); font-weight: 700; margin-top: 2px; }
-  .kpi-card-sub { font-size: 11px; color: var(--silver); margin-top: 2px; }
-  .kpi-card.credit .kpi-card-value { color: #FCA5A5; }
-
-  .compliance-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--platinum);
-    border-radius: 12px;
-    padding: 12px 16px;
-    margin-bottom: 8px;
-  }
-  .compliance-status {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 20px;
-    text-transform: uppercase;
-    color: var(--white);
-  }
-  .compliance-status.done { background: var(--green); }
-  .compliance-status.pending { background: var(--amber); }
-
-  .rank-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--silver);
-  }
-  .rank-row:last-child { border-bottom: none; }
-  .rank-name { font-size: 14.5px; font-weight: 600; color: var(--charcoal); }
-  .rank-sub { font-size: 12px; color: var(--charcoal); opacity: 0.55; margin-top: 2px; }
-  .rank-value { font-size: 15px; font-weight: 700; color: var(--royal-blue); }
-
-  /* ---------- Bottom action bar ---------- */
+  /* ---------- Bottom action bar (flow screens) ---------- */
   .bottom-bar {
     position: fixed;
     bottom: 0;
@@ -713,7 +279,6 @@
     font-weight: 700;
     letter-spacing: 0.3px;
     cursor: pointer;
-    transition: background 0.15s ease;
   }
   .save-btn:active { background: var(--royal-blue-dark); }
   .save-btn:disabled { opacity: 0.5; cursor: default; }
@@ -748,36 +313,220 @@
   .toast.error { background: var(--red); }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(6px); }
 
-  .price-updated-badge {
-    font-size: 10.5px;
-    color: var(--green);
-    font-weight: 700;
-    margin-top: 4px;
-    display: none;
-  }
+  .price-updated-badge { font-size: 10.5px; color: var(--green); font-weight: 700; margin-top: 4px; display: none; }
   .price-updated-badge.show { display: block; }
 
-  #screen-stockcount { display: none; }
+  /* ---------- Needs Calculator ---------- */
+  .window-banner {
+    background: #EAF0FF;
+    border: 2px solid var(--royal-blue);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+  }
+  .window-banner-label { font-size: 11px; font-weight: 700; color: var(--royal-blue); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+  .window-banner-dates { font-size: 15px; font-weight: 600; color: var(--charcoal); }
+
+  .needs-row { background: var(--platinum); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; }
+  .needs-row.manual { background: #FFF7ED; }
+  .needs-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .manual-tag {
+    background: var(--amber); color: var(--white); font-size: 10px; font-weight: 700;
+    letter-spacing: 0.3px; padding: 4px 8px; border-radius: 10px; text-transform: uppercase; white-space: nowrap;
+  }
+  .needs-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .needs-readonly { font-size: 16px; font-weight: 600; color: var(--charcoal); padding: 10px 0 0; }
+  .needs-readonly.dim { opacity: 0.4; font-weight: 500; font-size: 14px; }
+
+  /* ---------- Purchase Order screen ---------- */
+  .po-banner { background: var(--charcoal); color: var(--white); border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; }
+  .po-number { font-size: 12px; font-weight: 700; color: var(--silver); letter-spacing: 0.5px; text-transform: uppercase; }
+  .po-total { font-size: 28px; font-weight: 700; color: var(--white); margin-top: 4px; }
+  .po-total-label { font-size: 12px; color: var(--silver); font-weight: 500; }
+
+  .po-line { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--silver); }
+  .po-line:last-child { border-bottom: none; }
+  .po-line-name { font-size: 14.5px; font-weight: 600; color: var(--charcoal); }
+  .po-line-qty { font-size: 12.5px; color: var(--charcoal); opacity: 0.6; margin-top: 2px; }
+  .po-line-value { font-size: 15px; font-weight: 700; color: var(--charcoal); white-space: nowrap; }
+
+  .contact-card { background: var(--platinum); border-radius: 14px; padding: 16px 18px; margin: 18px 0; }
+  .contact-fields { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+  .save-contact-btn {
+    background: var(--charcoal); color: var(--white); border: none; border-radius: 10px; padding: 10px;
+    font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 13.5px; cursor: pointer; margin-top: 4px;
+  }
+
+  .send-buttons { display: flex; flex-direction: column; gap: 10px; }
+  .send-btn {
+    width: 100%; border: none; border-radius: 14px; padding: 15px; font-family: 'Poppins', sans-serif;
+    font-size: 15.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .send-btn.whatsapp { background: #25D366; color: var(--white); }
+  .send-btn.email { background: var(--royal-blue); color: var(--white); }
+  .send-btn:disabled { opacity: 0.4; cursor: default; }
+  .send-hint { font-size: 12px; color: var(--charcoal); opacity: 0.55; margin-top: 6px; text-align: center; }
+  .status-pill {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 20px; background: var(--green); color: var(--white); margin-top: 8px;
+  }
+
+  /* ---------- Supplier Notes ---------- */
+  .add-note-btn {
+    background: var(--royal-blue); color: var(--white); border: none; border-radius: 10px; padding: 10px;
+    font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 13.5px; cursor: pointer; margin-top: 8px; width: 100%;
+  }
+  .note-input { resize: vertical; min-height: 60px; font-weight: 500; font-size: 14.5px; }
+  .note-item { background: var(--platinum); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
+  .note-item-text { font-size: 14px; color: var(--charcoal); line-height: 1.4; }
+  .note-item-meta { font-size: 11px; color: var(--charcoal); opacity: 0.5; margin-top: 6px; font-weight: 500; }
+
+  /* ---------- Invoice Check ---------- */
+  .check-invoice-btn {
+    width: 100%; background: var(--white); color: var(--royal-blue); border: 2px solid var(--royal-blue);
+    border-radius: 14px; padding: 14px; font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; margin: 18px 0;
+  }
+  .photo-capture-btn {
+    width: 100%; background: var(--charcoal); color: var(--white); border: none; border-radius: 14px; padding: 15px;
+    font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .photo-preview { width: 100%; border-radius: 14px; margin: 12px 0; display: block; }
+  .photo-status { font-size: 13px; text-align: center; color: var(--charcoal); opacity: 0.6; margin: 8px 0 4px; }
+
+  .compare-row { background: var(--platinum); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; border-left: 5px solid var(--silver); }
+  .compare-row.status-match { border-left-color: var(--green); }
+  .compare-row.status-qty, .compare-row.status-price, .compare-row.status-both { border-left-color: var(--amber); }
+  .compare-row.status-missing { border-left-color: var(--red); }
+  .compare-row.status-extra { border-left-color: var(--royal-blue); }
+
+  .compare-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .compare-po-info { font-size: 12px; color: var(--charcoal); opacity: 0.6; margin-top: 2px; }
+  .status-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; padding: 4px 8px; border-radius: 10px; color: var(--white); white-space: nowrap; }
+  .status-badge.match { background: var(--green); }
+  .status-badge.qty, .status-badge.price, .status-badge.both { background: var(--amber); }
+  .status-badge.missing { background: var(--red); }
+  .status-badge.extra { background: var(--royal-blue); }
+
+  .compare-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .add-extra-btn {
+    width: 100%; background: none; border: 2px dashed var(--silver); border-radius: 14px; padding: 12px;
+    font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 14px; color: var(--charcoal); opacity: 0.7; cursor: pointer; margin-bottom: 14px;
+  }
+
+  .summary-banner { border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; text-align: center; font-weight: 700; font-size: 15px; }
+  .summary-banner.ok { background: #ECFDF3; color: var(--green); border: 2px solid var(--green); }
+  .summary-banner.diff { background: #FEF3E7; color: var(--amber); border: 2px solid var(--amber); }
+
+  /* ---------- Credit Note ---------- */
+  .generate-cn-btn {
+    width: 100%; background: var(--red); color: var(--white); border: none; border-radius: 14px; padding: 15px;
+    font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 16px;
+  }
+  .cn-row { background: var(--platinum); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; }
+  .cn-row-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+  .cn-checkbox { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--red); flex-shrink: 0; }
+  .cn-row-info { flex: 1; }
+  .cn-row-status { font-size: 11px; color: var(--charcoal); opacity: 0.55; margin-top: 2px; }
+  .cn-amount-field { display: flex; flex-direction: column; gap: 4px; }
+  .cn-amount-input { border-color: var(--red); color: var(--red); font-size: 16px; }
+  .cn-total-banner { background: var(--charcoal); color: var(--white); border-radius: 14px; padding: 16px 18px; margin: 16px 0; }
+  .mark-resolved-btn {
+    width: 100%; background: var(--green); color: var(--white); border: none; border-radius: 14px; padding: 14px;
+    font-family: 'Poppins', sans-serif; font-size: 14.5px; font-weight: 700; cursor: pointer; margin-top: 12px;
+  }
+
+  /* ---------- Dashboard ---------- */
+  .kpi-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .kpi-tab {
+    flex: 1; min-width: 70px; background: var(--platinum); border: 2px solid transparent; border-radius: 12px;
+    padding: 10px 4px; text-align: center; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 12px; color: var(--charcoal); cursor: pointer;
+  }
+  .kpi-tab.active { background: #EAF0FF; border-color: var(--royal-blue); color: var(--royal-blue); }
+
+  .kpi-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+  .kpi-card { background: var(--charcoal); border-radius: 14px; padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; }
+  .kpi-card-label { font-size: 12px; color: var(--silver); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+  .kpi-card-value { font-size: 22px; color: var(--white); font-weight: 700; margin-top: 2px; }
+  .kpi-card-sub { font-size: 11px; color: var(--silver); margin-top: 2px; }
+  .kpi-card.credit .kpi-card-value { color: #FCA5A5; }
+
+  .due-supplier-card { background: var(--platinum); border-radius: 14px; margin-bottom: 10px; overflow: hidden; }
+  .due-supplier-head {
+    display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; cursor: pointer;
+  }
+  .due-supplier-progress { display: flex; gap: 5px; margin-top: 5px; }
+  .progress-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--silver); }
+  .progress-dot.done { background: var(--green); }
+  .due-supplier-actions { display: none; padding: 0 16px 14px; flex-direction: column; gap: 8px; }
+  .due-supplier-actions.expanded { display: flex; }
+  .quick-action-btn {
+    width: 100%; text-align: left; background: var(--white); border: 2px solid var(--silver); border-radius: 10px;
+    padding: 10px 14px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 13.5px; color: var(--charcoal);
+    cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+  }
+  .quick-action-btn.complete { border-color: var(--green); color: var(--green); }
+  .quick-action-check { font-size: 14px; }
+
+  .compliance-row {
+    display: flex; align-items: center; justify-content: space-between; background: var(--platinum);
+    border-radius: 12px; padding: 12px 16px; margin-bottom: 8px;
+  }
+  .alert-row {
+    display: flex; align-items: center; justify-content: space-between; background: #FEF3E7;
+    border-left: 4px solid var(--amber); border-radius: 10px; padding: 12px 16px; margin-bottom: 8px;
+  }
+  .alert-row.credit { background: #FEF2F2; border-left-color: var(--red); }
+  .alert-row-name { font-size: 14px; font-weight: 600; color: var(--charcoal); }
+  .alert-row-sub { font-size: 11.5px; color: var(--charcoal); opacity: 0.6; margin-top: 2px; }
+  .alert-row-value { font-size: 13.5px; font-weight: 700; color: var(--amber); white-space: nowrap; }
+  .alert-row.credit .alert-row-value { color: var(--red); }
+
+  .rank-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--silver); }
+  .rank-row:last-child { border-bottom: none; }
+  .rank-name { font-size: 14.5px; font-weight: 600; color: var(--charcoal); }
+  .rank-sub { font-size: 12px; color: var(--charcoal); opacity: 0.55; margin-top: 2px; }
+  .rank-value { font-size: 15px; font-weight: 700; color: var(--royal-blue); }
+
+  /* ---------- Orders / Credit Notes list tabs ---------- */
+  .list-row {
+    display: flex; justify-content: space-between; align-items: center; background: var(--platinum);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer;
+  }
+  .list-row-num { font-size: 11px; font-weight: 700; color: var(--royal-blue); letter-spacing: 0.3px; }
+  .list-row-name { font-size: 15.5px; font-weight: 600; color: var(--charcoal); margin-top: 2px; }
+  .list-row-sub { font-size: 12px; color: var(--charcoal); opacity: 0.55; margin-top: 2px; }
+  .list-row-value { font-size: 15px; font-weight: 700; color: var(--charcoal); text-align: right; }
+  .list-row-status { font-size: 10.5px; font-weight: 700; text-transform: uppercase; margin-top: 4px; color: var(--green); }
+
+  #screen-stockcount, #screen-needs, #screen-po, #screen-invoice, #screen-cn,
+  #screen-orders, #screen-creditnotes { display: none; }
 </style>
 </head>
 <body>
 
 <div id="app">
 
+  <!-- ===================== DASHBOARD (HOME) ===================== -->
+  <div id="screen-dashboard">
+    <header>
+      <div class="header-row">
+        <img class="logo-img" src="fenmeat-logo.png" alt="FenMeat">
+        <div class="today-date" id="dash-date-label"></div>
+      </div>
+    </header>
+    <main>
+      <div id="dashboard-content" class="loading">Loading dashboard…</div>
+    </main>
+  </div>
+
   <!-- ===================== SUPPLIER PICKER SCREEN ===================== -->
   <div id="screen-suppliers">
     <header>
       <div class="header-row">
-        <div>
-          <div class="brand"><span class="fen">Fen</span><span class="meat">Meat</span></div>
-          <div class="brand-sub">Supplier Orders</div>
-        </div>
-        <div style="display:flex; align-items:center; gap:14px;">
-          <div class="today-date" id="today-date-label"></div>
-          <button class="dashboard-icon-btn" id="dashboard-btn" title="Dashboard">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
-          </button>
-        </div>
+        <img class="logo-img" src="fenmeat-logo.png" alt="FenMeat">
+        <div class="today-date" id="today-date-label"></div>
       </div>
     </header>
     <main>
@@ -785,13 +534,42 @@
     </main>
   </div>
 
+  <!-- ===================== ORDERS TAB ===================== -->
+  <div id="screen-orders">
+    <header>
+      <div class="header-row">
+        <div class="brand" style="font-size:19px;">Purchase Orders</div>
+      </div>
+    </header>
+    <main>
+      <div id="orders-content" class="loading">Loading orders…</div>
+    </main>
+  </div>
+
+  <!-- ===================== CREDIT NOTES TAB ===================== -->
+  <div id="screen-creditnotes">
+    <header>
+      <div class="header-row">
+        <div class="brand" style="font-size:19px;">Credit Notes</div>
+      </div>
+    </header>
+    <main>
+      <div id="creditnotes-content" class="loading">Loading credit notes…</div>
+    </main>
+  </div>
+
   <!-- ===================== STOCK COUNT SCREEN ===================== -->
   <div id="screen-stockcount">
     <header>
-      <button class="back-btn" id="back-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        Suppliers
-      </button>
+      <div class="flow-header-top">
+        <button class="back-btn" id="back-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          Suppliers
+        </button>
+        <button class="cancel-btn" id="cancel-btn-stockcount" title="Cancel and go to Dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
       <div class="header-row" style="margin-top:6px;">
         <div>
           <div class="brand" style="font-size:19px;"><span id="sc-supplier-name">—</span></div>
@@ -811,10 +589,15 @@
   <!-- ===================== NEEDS CALCULATOR SCREEN ===================== -->
   <div id="screen-needs">
     <header>
-      <button class="back-btn" id="back-btn-needs">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        Stock Count
-      </button>
+      <div class="flow-header-top">
+        <button class="back-btn" id="back-btn-needs">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          Stock Count
+        </button>
+        <button class="cancel-btn" id="cancel-btn-needs" title="Cancel and go to Dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
       <div class="header-row" style="margin-top:6px;">
         <div>
           <div class="brand" style="font-size:19px;"><span id="needs-supplier-name">—</span></div>
@@ -833,10 +616,15 @@
   <!-- ===================== PURCHASE ORDER SCREEN ===================== -->
   <div id="screen-po">
     <header>
-      <button class="back-btn" id="back-btn-po">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        Needs Calculator
-      </button>
+      <div class="flow-header-top">
+        <button class="back-btn" id="back-btn-po">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          <span id="po-back-label">Needs Calculator</span>
+        </button>
+        <button class="cancel-btn" id="cancel-btn-po" title="Cancel and go to Dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
       <div class="header-row" style="margin-top:6px;">
         <div>
           <div class="brand" style="font-size:19px;"><span id="po-supplier-name">—</span></div>
@@ -852,10 +640,15 @@
   <!-- ===================== INVOICE CHECK SCREEN ===================== -->
   <div id="screen-invoice">
     <header>
-      <button class="back-btn" id="back-btn-invoice">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        Purchase Order
-      </button>
+      <div class="flow-header-top">
+        <button class="back-btn" id="back-btn-invoice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          Purchase Order
+        </button>
+        <button class="cancel-btn" id="cancel-btn-invoice" title="Cancel and go to Dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
       <div class="header-row" style="margin-top:6px;">
         <div>
           <div class="brand" style="font-size:19px;">Invoice Check</div>
@@ -874,10 +667,15 @@
   <!-- ===================== CREDIT NOTE SCREEN ===================== -->
   <div id="screen-cn">
     <header>
-      <button class="back-btn" id="back-btn-cn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        Invoice Check
-      </button>
+      <div class="flow-header-top">
+        <button class="back-btn" id="back-btn-cn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          <span id="cn-back-label">Invoice Check</span>
+        </button>
+        <button class="cancel-btn" id="cancel-btn-cn" title="Cancel and go to Dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
       <div class="header-row" style="margin-top:6px;">
         <div>
           <div class="brand" style="font-size:19px;">Credit Note</div>
@@ -890,23 +688,24 @@
     </main>
   </div>
 
-  <!-- ===================== DASHBOARD SCREEN ===================== -->
-  <div id="screen-dashboard">
-    <header>
-      <button class="back-btn" id="back-btn-dashboard">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        Suppliers
-      </button>
-      <div class="header-row" style="margin-top:6px;">
-        <div>
-          <div class="brand" style="font-size:19px;">Dashboard</div>
-          <div class="brand-sub" style="text-transform:none; letter-spacing:0.3px;">Raw material overview</div>
-        </div>
-      </div>
-    </header>
-    <main>
-      <div id="dashboard-content" class="loading">Loading dashboard…</div>
-    </main>
+  <!-- ===================== BOTTOM TAB BAR (root screens only) ===================== -->
+  <div class="tab-bar" id="tab-bar">
+    <div class="tab-item" data-tab="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+      <div class="tab-item-label">Dashboard</div>
+    </div>
+    <div class="tab-item" data-tab="suppliers">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4v10l-9 4-9-4V7z"/><path d="M3 7l9 4 9-4M12 11v10"/></svg>
+      <div class="tab-item-label">Suppliers</div>
+    </div>
+    <div class="tab-item" data-tab="orders">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+      <div class="tab-item-label">Orders</div>
+    </div>
+    <div class="tab-item" data-tab="creditnotes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h2M7 15h10a2 2 0 002-2V9a2 2 0 00-2-2H7a2 2 0 00-2 2v4a2 2 0 002 2z"/></svg>
+      <div class="tab-item-label">Credit Notes</div>
+    </div>
   </div>
 
 </div>
@@ -915,6 +714,20 @@
 
 <script>
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzOvHW0qLnNQUP_kgImFdAXNcU7SMDsA6vYOFfeyyuBrs7j4MOrtWBgvoMv8Wba_A1yYw/exec';
+  const ROOT_SCREENS = ['dashboard', 'suppliers', 'orders', 'creditnotes'];
+  const ALL_SCREENS = ['dashboard', 'suppliers', 'orders', 'creditnotes', 'stockcount', 'needs', 'po', 'invoice', 'cn'];
+
+  // ---------- Number parsing (handles comma OR period decimal, fixes mobile locale bug) ----------
+  function parseNum(str) {
+    if (str === null || str === undefined || str === '') return null;
+    const cleaned = String(str).trim().replace(',', '.');
+    const n = parseFloat(cleaned);
+    return isNaN(n) ? null : n;
+  }
+  function parseNumOr0(str) {
+    const n = parseNum(str);
+    return n === null ? 0 : n;
+  }
 
   // ---------- Date helpers (GMT+2, matches Apps Script backend) ----------
   function todayISO() {
@@ -929,6 +742,11 @@
     return new Date().toLocaleDateString('en-GB', {
       timeZone: 'Africa/Johannesburg', weekday: 'short', day: 'numeric', month: 'short'
     });
+  }
+  function formatDateLabel(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso + 'T12:00:00');
+    return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
   }
 
   // ---------- Network helpers ----------
@@ -959,6 +777,10 @@
     toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
   }
 
+  function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
   // ---------- State ----------
   let currentSupplier = null;
   let currentMaterials = [];
@@ -967,24 +789,228 @@
   let currentSupplierContact = { phone: '', email: '' };
   let suppliersMap = {};
   let invoicePhotoUrl = '';
-  let invoiceRows = []; // {rmCode, name, poQty, poPrice, isExtra}
+  let invoiceRows = [];
   let lastComparisonItems = [];
   let currentCN = null;
   let dashboardData = null;
   let activeKpiPeriod = 'today';
+  let poBackTarget = 'needs'; // 'needs' or 'orders'
+  let cnBackTarget = 'invoice'; // 'invoice' or 'creditnotes'
 
   // ---------- Screen switching ----------
   function showScreen(name) {
-    const screens = ['suppliers', 'stockcount', 'needs', 'po', 'invoice', 'cn', 'dashboard'];
-    screens.forEach(s => {
+    ALL_SCREENS.forEach(s => {
       const el = document.getElementById('screen-' + s);
       el.style.display = (s === name) ? 'flex' : 'none';
       el.style.flexDirection = 'column';
     });
+    const isRoot = ROOT_SCREENS.indexOf(name) > -1;
+    document.getElementById('tab-bar').style.display = isRoot ? 'flex' : 'none';
+    if (isRoot) {
+      document.querySelectorAll('.tab-item').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    }
     window.scrollTo(0, 0);
   }
 
-  // ---------- Supplier Picker ----------
+  function goHome() {
+    showScreen('dashboard');
+    loadDashboard();
+  }
+
+  // ================= DASHBOARD =================
+  async function loadDashboard() {
+    document.getElementById('dash-date-label').textContent = todayDisplay();
+    const contentEl = document.getElementById('dashboard-content');
+    contentEl.className = 'loading';
+    contentEl.textContent = 'Loading dashboard…';
+    try {
+      const data = await apiGet('getDashboardSummary');
+      if (data.status !== 'ok') throw new Error(data.message);
+      dashboardData = data;
+      activeKpiPeriod = 'today';
+      contentEl.className = '';
+      contentEl.innerHTML = dashboardHTML(data);
+      wireDashboard(data);
+      // Keep suppliersMap fresh for quick-jump actions (contact info etc.)
+      loadSuppliersMapSilently();
+    } catch (err) {
+      contentEl.className = 'empty-state';
+      contentEl.textContent = 'Could not load dashboard. Check your connection and try again.';
+    }
+  }
+
+  async function loadSuppliersMapSilently() {
+    try {
+      const data = await apiGet('getSuppliers');
+      if (data.status === 'ok') {
+        data.suppliers.forEach(s => { suppliersMap[s.name] = s; });
+      }
+    } catch (err) { /* silent */ }
+  }
+
+  function dashboardHTML(data) {
+    let html = `
+      <div class="kpi-tabs">
+        <div class="kpi-tab active" data-period="today">Today</div>
+        <div class="kpi-tab" data-period="week">Week</div>
+        <div class="kpi-tab" data-period="month">Month</div>
+        <div class="kpi-tab" data-period="lastMonth">Last Month</div>
+      </div>
+      <div id="kpi-cards"></div>
+    `;
+
+    if (data.suppliersDueToday.length > 0) {
+      html += `<div class="section-label">Suppliers due today — tap for quick actions</div>`;
+      html += data.suppliersDueToday.map((s, i) => dueSupplierCardHTML(s, i)).join('');
+    }
+
+    if (data.lowStockAlerts && data.lowStockAlerts.length > 0) {
+      html += `<div class="section-label">Low stock alerts</div>`;
+      html += data.lowStockAlerts.map(a => `
+        <div class="alert-row">
+          <div>
+            <div class="alert-row-name">${escapeHtml(a.name)}</div>
+            <div class="alert-row-sub">Last counted ${a.lastCountDate ? formatDateLabel(a.lastCountDate) : ''}</div>
+          </div>
+          <div class="alert-row-value">${a.lastCountQty} / ${a.minStock} ${escapeHtml(a.unit)}</div>
+        </div>`).join('');
+    }
+
+    if (data.outstandingCreditNotes && data.outstandingCreditNotes.length > 0) {
+      html += `<div class="section-label">Outstanding credit notes (R${data.outstandingCreditNotesTotal.toFixed(2)})</div>`;
+      html += data.outstandingCreditNotes.map(cn => `
+        <div class="alert-row credit" data-cn="${escapeHtml(cn.cnNumber)}" style="cursor:pointer;">
+          <div>
+            <div class="alert-row-name">${escapeHtml(cn.supplier)}</div>
+            <div class="alert-row-sub">${escapeHtml(cn.cnNumber)} · ${formatDateLabel(cn.date)}</div>
+          </div>
+          <div class="alert-row-value">R${cn.total.toFixed(2)}</div>
+        </div>`).join('');
+    }
+
+    if (data.supplierBreakdownWeek.length > 0) {
+      html += `<div class="section-label">Orders this week per supplier</div><div class="material-row">`;
+      html += data.supplierBreakdownWeek.map(s => rankRowHTML(s.supplier, s.poCount + ' order' + (s.poCount === 1 ? '' : 's'), s.totalSpend)).join('');
+      html += `</div>`;
+    }
+
+    if (data.supplierBreakdownMonth.length > 0) {
+      html += `<div class="section-label">Orders this month per supplier</div><div class="material-row">`;
+      html += data.supplierBreakdownMonth.map(s => rankRowHTML(s.supplier, s.poCount + ' order' + (s.poCount === 1 ? '' : 's'), s.totalSpend)).join('');
+      html += `</div>`;
+    }
+
+    if (data.supplierBreakdownLastMonth.length > 0) {
+      html += `<div class="section-label">Total orders last month per supplier</div><div class="material-row">`;
+      html += data.supplierBreakdownLastMonth.map(s => rankRowHTML(s.supplier, s.poCount + ' order' + (s.poCount === 1 ? '' : 's'), s.totalSpend)).join('');
+      html += `</div>`;
+    }
+
+    if (data.topIngredientsMonth.length > 0) {
+      html += `<div class="section-label">Top ingredients this month</div><div class="material-row">`;
+      html += data.topIngredientsMonth.map(it => rankRowHTML(it.name, it.totalQty + ' units ordered', it.totalSpend)).join('');
+      html += `</div>`;
+    }
+
+    return html;
+  }
+
+  function rankRowHTML(name, sub, value) {
+    return `
+      <div class="rank-row">
+        <div>
+          <div class="rank-name">${escapeHtml(name)}</div>
+          <div class="rank-sub">${escapeHtml(sub)}</div>
+        </div>
+        <div class="rank-value">R${value.toFixed(2)}</div>
+      </div>`;
+  }
+
+  function dueSupplierCardHTML(s, idx) {
+    const dots = [s.stockCounted, s.orderPlanned, !!s.poNumber];
+    return `
+      <div class="due-supplier-card">
+        <div class="due-supplier-head" data-idx="${idx}">
+          <div>
+            <div class="supplier-name" style="font-size:15.5px;">${escapeHtml(s.name)}</div>
+            <div class="due-supplier-progress">
+              <div class="progress-dot ${dots[0] ? 'done' : ''}"></div>
+              <div class="progress-dot ${dots[1] ? 'done' : ''}"></div>
+              <div class="progress-dot ${dots[2] ? 'done' : ''}"></div>
+            </div>
+          </div>
+          <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+        <div class="due-supplier-actions" id="due-actions-${idx}">
+          <button class="quick-action-btn ${s.stockCounted ? 'complete' : ''}" data-action="stockcount" data-name="${escapeHtml(s.name)}">
+            Stock Count <span class="quick-action-check">${s.stockCounted ? '✓' : '›'}</span>
+          </button>
+          <button class="quick-action-btn ${s.orderPlanned ? 'complete' : ''}" data-action="needs" data-name="${escapeHtml(s.name)}">
+            Needs Calculator <span class="quick-action-check">${s.orderPlanned ? '✓' : '›'}</span>
+          </button>
+          <button class="quick-action-btn ${s.poNumber ? 'complete' : ''}" data-action="po" data-name="${escapeHtml(s.name)}">
+            Purchase Order <span class="quick-action-check">${s.poNumber ? '✓' : '›'}</span>
+          </button>
+        </div>
+      </div>`;
+  }
+
+  function kpiCardsHTML(bucket, periodLabel) {
+    return `
+      <div class="kpi-cards">
+        <div class="kpi-card">
+          <div>
+            <div class="kpi-card-label">Raw material spend</div>
+            <div class="kpi-card-value">R${bucket.totalSpend.toFixed(2)}</div>
+          </div>
+          <div class="kpi-card-sub">${bucket.poCount} order${bucket.poCount === 1 ? '' : 's'}</div>
+        </div>
+        <div class="kpi-card credit">
+          <div>
+            <div class="kpi-card-label">Credit notes issued</div>
+            <div class="kpi-card-value">R${bucket.creditValue.toFixed(2)}</div>
+          </div>
+          <div class="kpi-card-sub">${bucket.creditCount} note${bucket.creditCount === 1 ? '' : 's'}</div>
+        </div>
+      </div>`;
+  }
+
+  function wireDashboard(data) {
+    document.getElementById('kpi-cards').innerHTML = kpiCardsHTML(data[activeKpiPeriod]);
+    document.querySelectorAll('.kpi-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.kpi-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeKpiPeriod = tab.dataset.period;
+        document.getElementById('kpi-cards').innerHTML = kpiCardsHTML(data[activeKpiPeriod]);
+      });
+    });
+
+    document.querySelectorAll('.due-supplier-head').forEach(head => {
+      head.addEventListener('click', () => {
+        const idx = head.dataset.idx;
+        document.getElementById('due-actions-' + idx).classList.toggle('expanded');
+      });
+    });
+
+    document.querySelectorAll('.quick-action-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const name = btn.dataset.name;
+        const action = btn.dataset.action;
+        currentSupplier = name;
+        if (action === 'stockcount') openSupplier(name);
+        else if (action === 'needs') openNeedsCalculator(name);
+        else if (action === 'po') { poBackTarget = 'needs'; openPurchaseOrder(name); }
+      });
+    });
+
+    document.querySelectorAll('.alert-row.credit').forEach(row => {
+      row.addEventListener('click', () => viewCreditNote(row.dataset.cn));
+    });
+  }
+
+  // ================= SUPPLIER PICKER =================
   async function loadSuppliers() {
     document.getElementById('today-date-label').textContent = todayDisplay();
     const contentEl = document.getElementById('suppliers-content');
@@ -1032,11 +1058,7 @@
       </div>`;
   }
 
-  function escapeHtml(str) {
-    return String(str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  }
-
-  // ---------- Stock Count ----------
+  // ================= STOCK COUNT =================
   async function openSupplier(name) {
     currentSupplier = name;
     document.getElementById('sc-supplier-name').textContent = name;
@@ -1079,14 +1101,14 @@
         <div class="material-fields">
           <div class="field-block">
             <div class="field-label">Qty counted</div>
-            <input type="number" inputmode="decimal" class="qty-input" data-idx="${idx}" placeholder="0" min="0" step="any">
+            <input type="text" inputmode="decimal" class="qty-input" data-idx="${idx}" placeholder="0">
             <div class="unit-hint">${escapeHtml(m.unit)}${m.minStock ? ' · min stock ' + m.minStock : ''}</div>
           </div>
           <div class="field-block">
             <div class="field-label">Price / ${escapeHtml(m.unit)}</div>
             <div class="price-wrap">
               <span class="currency-r">R</span>
-              <input type="number" inputmode="decimal" class="price-input" data-idx="${idx}" value="${m.currentPrice || ''}" step="0.01" min="0">
+              <input type="text" inputmode="decimal" class="price-input" data-idx="${idx}" value="${m.currentPrice || ''}">
             </div>
             <div class="price-updated-badge" data-idx="${idx}">Price updated</div>
           </div>
@@ -1094,14 +1116,13 @@
       </div>`;
   }
 
-  // Flag a price row as changed (visual confirmation only — actual save happens on Save Count)
   document.addEventListener('input', (e) => {
     if (e.target.classList.contains('price-input')) {
       const idx = e.target.dataset.idx;
       const original = currentMaterials[idx] ? currentMaterials[idx].currentPrice : null;
       const badge = document.querySelector(`.price-updated-badge[data-idx="${idx}"]`);
       if (badge) {
-        const changed = parseFloat(e.target.value) !== parseFloat(original);
+        const changed = parseNum(e.target.value) !== parseNum(original);
         badge.classList.toggle('show', changed && e.target.value !== '');
       }
     }
@@ -1120,17 +1141,13 @@
       return {
         rmCode: m.rmCode,
         name: m.name,
-        qtyCounted: qtyEl && qtyEl.value !== '' ? Number(qtyEl.value) : 0,
-        price: priceEl && priceEl.value !== '' ? Number(priceEl.value) : ''
+        qtyCounted: qtyEl ? parseNumOr0(qtyEl.value) : 0,
+        price: priceEl && priceEl.value !== '' ? parseNumOr0(priceEl.value) : ''
       };
     });
 
     try {
-      const data = await apiPost('writeRawStockCount', {
-        date: todayISO(),
-        supplier: currentSupplier,
-        rows
-      });
+      const data = await apiPost('writeRawStockCount', { date: todayISO(), supplier: currentSupplier, rows });
       if (data.status !== 'ok') throw new Error(data.message || 'Save failed');
 
       showToast(`Saved · ${data.saved} items` + (data.pricesUpdated ? ` · ${data.pricesUpdated} prices updated` : ''));
@@ -1143,14 +1160,9 @@
     }
   }
 
-  // ---------- Needs Calculator ----------
-  function formatDateLabel(iso) {
-    if (!iso) return '—';
-    const d = new Date(iso + 'T12:00:00');
-    return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
-  }
-
+  // ================= NEEDS CALCULATOR =================
   async function openNeedsCalculator(name) {
+    currentSupplier = name;
     document.getElementById('needs-supplier-name').textContent = name;
     showScreen('needs');
 
@@ -1205,7 +1217,7 @@
           </div>
           <div class="field-block">
             <div class="field-label">Order qty</div>
-            <input type="number" inputmode="decimal" class="order-qty-input" data-idx="${idx}" value="${defaultOrderQty}" placeholder="0" min="0" step="any">
+            <input type="text" inputmode="decimal" class="order-qty-input" data-idx="${idx}" value="${defaultOrderQty}" placeholder="0">
           </div>
         </div>
       </div>`;
@@ -1220,25 +1232,16 @@
 
     const rows = currentNeeds.map((item, i) => {
       const el = document.querySelector(`.order-qty-input[data-idx="${i}"]`);
-      const orderQty = el && el.value !== '' ? Number(el.value) : 0;
-      return {
-        rmCode: item.rmCode,
-        name: item.name,
-        forecastNeed: item.forecastNeed,
-        stockCounted: item.stockCounted,
-        orderQty: orderQty
-      };
+      const orderQty = el ? parseNumOr0(el.value) : 0;
+      return { rmCode: item.rmCode, name: item.name, forecastNeed: item.forecastNeed, stockCounted: item.stockCounted, orderQty: orderQty };
     });
 
     try {
-      const data = await apiPost('writeOrderPlan', {
-        date: todayISO(),
-        supplier: currentSupplier,
-        rows
-      });
+      const data = await apiPost('writeOrderPlan', { date: todayISO(), supplier: currentSupplier, rows });
       if (data.status !== 'ok') throw new Error(data.message || 'Save failed');
 
       showToast(`Order plan saved · ${data.saved} items`);
+      poBackTarget = 'needs';
       setTimeout(() => openPurchaseOrder(currentSupplier), 700);
     } catch (err) {
       showToast('Could not save. Try again.', true);
@@ -1248,7 +1251,7 @@
     }
   }
 
-  // ---------- Purchase Order ----------
+  // ================= PURCHASE ORDER =================
   function toWhatsAppPhone(raw) {
     let digits = String(raw || '').replace(/\D/g, '');
     if (!digits) return '';
@@ -1256,12 +1259,17 @@
     return digits;
   }
 
+  const BRAND_HEADER = 'FENMEAT — Quality is our priority';
+
   function buildPOMessage(po) {
     const lines = po.items.map(li => `- ${li.name}: ${li.qty} ${li.unit} @ R${li.price.toFixed(2)} = R${li.lineTotal.toFixed(2)}`);
-    return `FenMeat Purchase Order ${po.poNumber}\nSupplier: ${po.supplier}\nDate: ${po.date}\n\nItems:\n${lines.join('\n')}\n\nTotal: R${po.total.toFixed(2)}`;
+    return `${BRAND_HEADER}\n\nPurchase Order ${po.poNumber}\nSupplier: ${po.supplier}\nDate: ${po.date}\n\nItems:\n${lines.join('\n')}\n\nTotal: R${po.total.toFixed(2)}`;
   }
 
   async function openPurchaseOrder(name) {
+    currentSupplier = name;
+    poBackTarget = 'needs';
+    document.getElementById('po-back-label').textContent = 'Needs Calculator';
     document.getElementById('po-supplier-name').textContent = name;
     showScreen('po');
 
@@ -1293,14 +1301,40 @@
     }
   }
 
+  async function viewPurchaseOrder(poNumber) {
+    poBackTarget = 'orders';
+    document.getElementById('po-back-label').textContent = 'Orders';
+    showScreen('po');
+    const contentEl = document.getElementById('po-content');
+    contentEl.className = 'loading';
+    contentEl.textContent = 'Loading…';
+
+    try {
+      const data = await apiGet('getPurchaseOrder', { poNumber: poNumber });
+      if (data.status !== 'ok' || !data.found) throw new Error('Not found');
+      currentPO = data.po;
+      currentSupplier = data.po.supplier;
+      document.getElementById('po-supplier-name').textContent = currentSupplier;
+      const contact = suppliersMap[currentSupplier] || {};
+      currentSupplierContact = { phone: contact.contactPhone || '', email: contact.contactEmail || '' };
+
+      contentEl.className = '';
+      contentEl.innerHTML = poScreenHTML(currentPO);
+      wirePOScreen();
+    } catch (err) {
+      contentEl.className = 'empty-state';
+      contentEl.textContent = 'Could not load this purchase order.';
+    }
+  }
+
   function poScreenHTML(po) {
     const linesHTML = po.items.map(li => `
       <div class="po-line">
         <div>
           <div class="po-line-name">${escapeHtml(li.name)}</div>
-          <div class="po-line-qty">${li.qty} ${escapeHtml(li.unit)} @ R${li.price.toFixed(2)}</div>
+          <div class="po-line-qty">${li.qty} ${escapeHtml(li.unit)} @ R${Number(li.price).toFixed(2)}</div>
         </div>
-        <div class="po-line-value">R${li.lineTotal.toFixed(2)}</div>
+        <div class="po-line-value">R${Number(li.lineTotal).toFixed(2)}</div>
       </div>`).join('');
 
     const hasPhone = !!currentSupplierContact.phone;
@@ -1308,9 +1342,9 @@
 
     return `
       <div class="po-banner">
-        <div class="po-number">${escapeHtml(po.poNumber)}</div>
+        <div class="po-number">${escapeHtml(po.poNumber)}${po.status ? ' · ' + escapeHtml(po.status) : ''}</div>
         <div class="po-total-label">Total value</div>
-        <div class="po-total">R${po.total.toFixed(2)}</div>
+        <div class="po-total">R${Number(po.total).toFixed(2)}</div>
       </div>
 
       <div class="section-label">Line items</div>
@@ -1353,60 +1387,6 @@
     loadSupplierNotes();
   }
 
-  function noteItemHTML(n) {
-    const d = n.timestamp ? new Date(n.timestamp) : null;
-    const when = d ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ' · ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
-    return `
-      <div class="note-item">
-        <div class="note-item-text">${escapeHtml(n.note)}</div>
-        <div class="note-item-meta">${when}${n.poNumber ? ' · ' + escapeHtml(n.poNumber) : ''}</div>
-      </div>`;
-  }
-
-  async function loadSupplierNotes() {
-    const listEl = document.getElementById('notes-list');
-    if (!listEl) return;
-    listEl.innerHTML = '<div class="loading" style="padding:20px 0;">Loading notes…</div>';
-    try {
-      const data = await apiGet('getSupplierNotes', { supplier: currentSupplier });
-      if (data.status !== 'ok') throw new Error(data.message);
-      if (!data.notes || data.notes.length === 0) {
-        listEl.innerHTML = '<div class="empty-state" style="padding:20px 0;">No notes yet for this supplier.</div>';
-        return;
-      }
-      listEl.innerHTML = data.notes.map(noteItemHTML).join('');
-    } catch (err) {
-      listEl.innerHTML = '<div class="empty-state" style="padding:20px 0;">Could not load notes.</div>';
-    }
-  }
-
-  async function addSupplierNote() {
-    const input = document.getElementById('new-note-input');
-    const note = input.value.trim();
-    if (!note) return;
-
-    const btn = document.getElementById('add-note-btn');
-    btn.disabled = true;
-    btn.textContent = 'Saving…';
-
-    try {
-      const data = await apiPost('addSupplierNote', {
-        supplier: currentSupplier,
-        poNumber: currentPO ? currentPO.poNumber : '',
-        note: note
-      });
-      if (data.status !== 'ok') throw new Error(data.message);
-      input.value = '';
-      showToast('Note added');
-      loadSupplierNotes();
-    } catch (err) {
-      showToast('Could not save note.', true);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Add Note';
-    }
-  }
-
   async function saveSupplierContact() {
     const phone = document.getElementById('contact-phone').value.trim();
     const email = document.getElementById('contact-email').value.trim();
@@ -1414,10 +1394,7 @@
     btn.disabled = true;
     btn.textContent = 'Saving…';
     try {
-      const data = await apiPost('updateSupplier', {
-        originalName: currentSupplier,
-        supplier: { contactPhone: phone, contactEmail: email }
-      });
+      const data = await apiPost('updateSupplier', { originalName: currentSupplier, supplier: { contactPhone: phone, contactEmail: email } });
       if (data.status !== 'ok') throw new Error(data.message);
       currentSupplierContact = { phone, email };
       if (suppliersMap[currentSupplier]) {
@@ -1455,7 +1432,58 @@
     if (pill) pill.innerHTML = `<div class="status-pill">Sent via ${channel === 'whatsapp' ? 'WhatsApp' : 'Email'}</div>`;
   }
 
-  // ---------- Invoice Check ----------
+  // ================= SUPPLIER NOTES =================
+  function noteItemHTML(n) {
+    const d = n.timestamp ? new Date(n.timestamp) : null;
+    const when = d ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ' · ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
+    return `
+      <div class="note-item">
+        <div class="note-item-text">${escapeHtml(n.note)}</div>
+        <div class="note-item-meta">${when}${n.poNumber ? ' · ' + escapeHtml(n.poNumber) : ''}</div>
+      </div>`;
+  }
+
+  async function loadSupplierNotes() {
+    const listEl = document.getElementById('notes-list');
+    if (!listEl) return;
+    listEl.innerHTML = '<div class="loading" style="padding:20px 0;">Loading notes…</div>';
+    try {
+      const data = await apiGet('getSupplierNotes', { supplier: currentSupplier });
+      if (data.status !== 'ok') throw new Error(data.message);
+      if (!data.notes || data.notes.length === 0) {
+        listEl.innerHTML = '<div class="empty-state" style="padding:20px 0;">No notes yet for this supplier.</div>';
+        return;
+      }
+      listEl.innerHTML = data.notes.map(noteItemHTML).join('');
+    } catch (err) {
+      listEl.innerHTML = '<div class="empty-state" style="padding:20px 0;">Could not load notes.</div>';
+    }
+  }
+
+  async function addSupplierNote() {
+    const input = document.getElementById('new-note-input');
+    const note = input.value.trim();
+    if (!note) return;
+
+    const btn = document.getElementById('add-note-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    try {
+      const data = await apiPost('addSupplierNote', { supplier: currentSupplier, poNumber: currentPO ? currentPO.poNumber : '', note: note });
+      if (data.status !== 'ok') throw new Error(data.message);
+      input.value = '';
+      showToast('Note added');
+      loadSupplierNotes();
+    } catch (err) {
+      showToast('Could not save note.', true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Add Note';
+    }
+  }
+
+  // ================= INVOICE CHECK =================
   function fileToBase64(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -1468,9 +1496,7 @@
   function openInvoiceCheck(po) {
     if (!po) return;
     invoicePhotoUrl = '';
-    invoiceRows = po.items.map(li => ({
-      rmCode: li.rmCode, name: li.name, poQty: li.qty, poPrice: li.price, isExtra: false
-    }));
+    invoiceRows = po.items.map(li => ({ rmCode: li.rmCode, name: li.name, poQty: li.qty, poPrice: Number(li.price), isExtra: false }));
 
     document.getElementById('invoice-po-label').textContent = po.poNumber;
     showScreen('invoice');
@@ -1503,18 +1529,18 @@
       <div class="compare-row" data-idx="${idx}" id="compare-row-${idx}">
         <div class="compare-header">
           <div>
-            <div class="material-name">${escapeHtml(r.name)}${r.isExtra ? '' : ''}</div>
+            <div class="material-name">${escapeHtml(r.name)}</div>
             <div class="compare-po-info">${r.isExtra ? 'Not on original PO' : 'PO: ' + r.poQty + ' @ R' + r.poPrice.toFixed(2)}</div>
           </div>
         </div>
         <div class="compare-fields">
           <div class="field-block">
             <div class="field-label">Invoice qty</div>
-            <input type="number" inputmode="decimal" class="compare-input inv-qty" data-idx="${idx}" placeholder="0" step="any">
+            <input type="text" inputmode="decimal" class="compare-input inv-qty" data-idx="${idx}" placeholder="0">
           </div>
           <div class="field-block">
             <div class="field-label">Invoice price</div>
-            <input type="number" inputmode="decimal" class="compare-input inv-price" data-idx="${idx}" placeholder="0.00" step="0.01">
+            <input type="text" inputmode="decimal" class="compare-input inv-price" data-idx="${idx}" placeholder="0.00">
           </div>
         </div>
       </div>`;
@@ -1537,16 +1563,11 @@
     try {
       const base64 = await fileToBase64(file);
       const data = await apiPost('uploadInvoicePhoto', {
-        poNumber: currentPO.poNumber,
-        supplier: currentSupplier,
-        imageBase64: base64,
-        mimeType: file.type || 'image/jpeg'
+        poNumber: currentPO.poNumber, supplier: currentSupplier, imageBase64: base64, mimeType: file.type || 'image/jpeg'
       });
       if (data.status !== 'ok') throw new Error(data.message);
       invoicePhotoUrl = data.fileUrl;
-      previewArea.innerHTML = `
-        <img class="photo-preview" src="${URL.createObjectURL(file)}" alt="Invoice photo">
-        <div class="photo-status">✓ Saved to Drive</div>`;
+      previewArea.innerHTML = `<img class="photo-preview" src="${URL.createObjectURL(file)}" alt="Invoice photo"><div class="photo-status">✓ Saved to Drive</div>`;
     } catch (err) {
       previewArea.innerHTML = '<div class="photo-status">Could not upload photo. Try again.</div>';
     }
@@ -1561,23 +1582,16 @@
       const qtyEl = document.querySelector(`.inv-qty[data-idx="${i}"]`);
       const priceEl = document.querySelector(`.inv-price[data-idx="${i}"]`);
       return {
-        rmCode: r.rmCode,
-        name: r.name,
-        poQty: r.poQty,
-        poPrice: r.poPrice,
-        invoiceQty: qtyEl && qtyEl.value !== '' ? qtyEl.value : '',
-        invoicePrice: priceEl && priceEl.value !== '' ? priceEl.value : '',
+        rmCode: r.rmCode, name: r.name, poQty: r.poQty, poPrice: r.poPrice,
+        invoiceQty: qtyEl && qtyEl.value !== '' ? parseNumOr0(qtyEl.value) : '',
+        invoicePrice: priceEl && priceEl.value !== '' ? parseNumOr0(priceEl.value) : '',
         isExtra: r.isExtra
       };
     });
 
     try {
       const data = await apiPost('compareInvoice', {
-        poNumber: currentPO.poNumber,
-        supplier: currentSupplier,
-        date: todayISO(),
-        invoicePhotoUrl: invoicePhotoUrl,
-        invoiceItems: items
+        poNumber: currentPO.poNumber, supplier: currentSupplier, date: todayISO(), invoicePhotoUrl: invoicePhotoUrl, invoiceItems: items
       });
       if (data.status !== 'ok') throw new Error(data.message);
       renderComparisonResults(data.items, data.hasDiscrepancy);
@@ -1590,12 +1604,10 @@
   }
 
   function statusClass(status) {
-    return { MATCH: 'match', QTY_DIFF: 'qty', PRICE_DIFF: 'price', BOTH_DIFF: 'both',
-      MISSING_ON_INVOICE: 'missing', EXTRA_ON_INVOICE: 'extra' }[status] || '';
+    return { MATCH: 'match', QTY_DIFF: 'qty', PRICE_DIFF: 'price', BOTH_DIFF: 'both', MISSING_ON_INVOICE: 'missing', EXTRA_ON_INVOICE: 'extra' }[status] || '';
   }
   function statusLabel(status) {
-    return { MATCH: 'Match', QTY_DIFF: 'Qty differs', PRICE_DIFF: 'Price differs', BOTH_DIFF: 'Qty & price differ',
-      MISSING_ON_INVOICE: 'Missing on invoice', EXTRA_ON_INVOICE: 'Extra on invoice' }[status] || status;
+    return { MATCH: 'Match', QTY_DIFF: 'Qty differs', PRICE_DIFF: 'Price differs', BOTH_DIFF: 'Qty & price differ', MISSING_ON_INVOICE: 'Missing on invoice', EXTRA_ON_INVOICE: 'Extra on invoice' }[status] || status;
   }
 
   function renderComparisonResults(items, hasDiscrepancy) {
@@ -1619,9 +1631,7 @@
         </div>
       </div>`).join('');
 
-    const cnButton = hasDiscrepancy
-      ? `<button class="generate-cn-btn" id="generate-cn-btn">Generate Credit Note</button>`
-      : '';
+    const cnButton = hasDiscrepancy ? `<button class="generate-cn-btn" id="generate-cn-btn">Generate Credit Note</button>` : '';
 
     resultsEl.innerHTML = banner + rows + cnButton;
     resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1630,7 +1640,7 @@
     if (cnBtn) cnBtn.addEventListener('click', openCreditNoteBuilder);
   }
 
-  // ---------- Credit Note ----------
+  // ================= CREDIT NOTE =================
   function suggestedCredit(item) {
     if (item.status === 'PRICE_DIFF' || item.status === 'BOTH_DIFF') {
       if (item.invoicePrice != null && item.invoicePrice > item.poPrice && item.invoiceQty != null) {
@@ -1641,10 +1651,12 @@
     if (item.status === 'EXTRA_ON_INVOICE') {
       return Math.round((item.invoiceQty || 0) * (item.invoicePrice || 0) * 100) / 100;
     }
-    return 0; // QTY_DIFF / MISSING_ON_INVOICE — Alex decides manually
+    return 0;
   }
 
   function openCreditNoteBuilder() {
+    cnBackTarget = 'invoice';
+    document.getElementById('cn-back-label').textContent = 'Invoice Check';
     document.getElementById('cn-supplier-label').textContent = currentSupplier;
     showScreen('cn');
 
@@ -1690,7 +1702,7 @@
         </div>
         <div class="cn-amount-field">
           <div class="field-label">Credit amount (R)</div>
-          <input type="number" inputmode="decimal" class="cn-amount-input" data-idx="${idx}" value="${suggested}" step="0.01" min="0">
+          <input type="text" inputmode="decimal" class="cn-amount-input" data-idx="${idx}" value="${suggested}">
         </div>
       </div>`;
   }
@@ -1700,7 +1712,7 @@
     document.querySelectorAll('.cn-checkbox').forEach(cb => {
       if (cb.checked) {
         const amt = document.querySelector(`.cn-amount-input[data-idx="${cb.dataset.idx}"]`);
-        total += amt ? (Number(amt.value) || 0) : 0;
+        total += amt ? parseNumOr0(amt.value) : 0;
       }
     });
     document.getElementById('cn-running-total').textContent = 'R' + total.toFixed(2);
@@ -1713,13 +1725,9 @@
       const idx = cb.dataset.idx;
       const it = discrepant[idx];
       const amtEl = document.querySelector(`.cn-amount-input[data-idx="${idx}"]`);
-      const creditAmount = amtEl ? (Number(amtEl.value) || 0) : 0;
+      const creditAmount = amtEl ? parseNumOr0(amtEl.value) : 0;
       if (creditAmount <= 0) return;
-      rows.push({
-        rmCode: it.rmCode, name: it.name, status: it.status,
-        poQty: it.poQty, poPrice: it.poPrice, invoiceQty: it.invoiceQty, invoicePrice: it.invoicePrice,
-        creditAmount: creditAmount
-      });
+      rows.push({ rmCode: it.rmCode, name: it.name, status: it.status, poQty: it.poQty, poPrice: it.poPrice, invoiceQty: it.invoiceQty, invoicePrice: it.invoicePrice, creditAmount: creditAmount });
     });
 
     if (rows.length === 0) {
@@ -1732,9 +1740,7 @@
     btn.textContent = 'Creating…';
 
     try {
-      const data = await apiPost('createCreditNote', {
-        date: todayISO(), supplier: currentSupplier, poNumber: currentPO.poNumber, items: rows
-      });
+      const data = await apiPost('createCreditNote', { date: todayISO(), supplier: currentSupplier, poNumber: currentPO.poNumber, items: rows });
       if (data.status !== 'ok') throw new Error(data.message);
       currentCN = data;
       renderCNSummary(data);
@@ -1747,7 +1753,7 @@
 
   function buildCNMessage(cn) {
     const lines = cn.items.map(it => `- ${it.name}: R${Number(it.creditAmount).toFixed(2)} (${statusLabel(it.status)})`);
-    return `FenMeat Credit Note ${cn.cnNumber}\nSupplier: ${cn.supplier}\nRelated PO: ${cn.poNumber}\nDate: ${cn.date}\n\nItems:\n${lines.join('\n')}\n\nTotal credit due: R${cn.total.toFixed(2)}`;
+    return `${BRAND_HEADER}\n\nCredit Note ${cn.cnNumber}\nSupplier: ${cn.supplier}\nRelated PO: ${cn.poNumber}\nDate: ${cn.date}\n\nItems:\n${lines.join('\n')}\n\nTotal credit due: R${cn.total.toFixed(2)}`;
   }
 
   function renderCNSummary(cn) {
@@ -1763,12 +1769,13 @@
 
     const hasPhone = !!currentSupplierContact.phone;
     const hasEmail = !!currentSupplierContact.email;
+    const isResolved = cn.status === 'Resolved';
 
     contentEl.innerHTML = `
       <div class="po-banner">
-        <div class="po-number">${escapeHtml(cn.cnNumber)}</div>
+        <div class="po-number">${escapeHtml(cn.cnNumber)}${cn.status ? ' · ' + escapeHtml(cn.status) : ''}</div>
         <div class="po-total-label">Credit total</div>
-        <div class="po-total">R${cn.total.toFixed(2)}</div>
+        <div class="po-total">R${Number(cn.total).toFixed(2)}</div>
       </div>
       <div class="section-label">Items</div>
       <div class="po-lines">${linesHTML}</div>
@@ -1779,12 +1786,33 @@
       </div>
       <div class="send-hint">Also sets a Google Calendar follow-up reminder for 3 days from now.</div>
       <div id="cn-status-pill"></div>
+      ${!isResolved ? `<button class="mark-resolved-btn" id="mark-resolved-btn">Mark Resolved</button>` : ''}
     `;
 
     const waBtn = document.getElementById('cn-send-whatsapp-btn');
     const emailBtn = document.getElementById('cn-send-email-btn');
     if (waBtn) waBtn.addEventListener('click', () => sendCN('whatsapp'));
     if (emailBtn) emailBtn.addEventListener('click', () => sendCN('email'));
+    const resolveBtn = document.getElementById('mark-resolved-btn');
+    if (resolveBtn) resolveBtn.addEventListener('click', markCNResolved);
+  }
+
+  async function markCNResolved() {
+    if (!currentCN) return;
+    const btn = document.getElementById('mark-resolved-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    try {
+      const data = await apiPost('markCreditNoteResolved', { cnNumber: currentCN.cnNumber });
+      if (data.status !== 'ok') throw new Error(data.message);
+      showToast('Credit note marked resolved');
+      currentCN.status = 'Resolved';
+      renderCNSummary(currentCN);
+    } catch (err) {
+      showToast('Could not mark resolved.', true);
+      btn.disabled = false;
+      btn.textContent = 'Mark Resolved';
+    }
   }
 
   async function sendCN(channel) {
@@ -1803,144 +1831,139 @@
     }
 
     try {
-      const data = await apiPost('markCreditNoteSent', {
-        cnNumber: currentCN.cnNumber, channel: channel, supplier: currentSupplier,
-        total: currentCN.total, followUpDays: 3
-      });
+      const data = await apiPost('markCreditNoteSent', { cnNumber: currentCN.cnNumber, channel: channel, supplier: currentSupplier, total: currentCN.total, followUpDays: 3 });
       const pill = document.getElementById('cn-status-pill');
       if (pill) {
         pill.innerHTML = `<div class="status-pill">Sent via ${channel === 'whatsapp' ? 'WhatsApp' : 'Email'}</div>` +
           (data.reminderCreated ? `<div class="status-pill" style="background:var(--royal-blue); margin-left:6px;">Reminder set for 3 days</div>` : '');
       }
-    } catch (err) {
-      // sending already happened client-side; silently ignore reminder failure
-    }
+    } catch (err) { /* sending already happened client-side */ }
   }
 
-  // ---------- Dashboard ----------
-  async function openDashboard() {
-    showScreen('dashboard');
-    const contentEl = document.getElementById('dashboard-content');
+  async function viewCreditNote(cnNumber) {
+    cnBackTarget = 'creditnotes';
+    document.getElementById('cn-back-label').textContent = 'Credit Notes';
+    showScreen('cn');
+    const contentEl = document.getElementById('cn-content');
     contentEl.className = 'loading';
-    contentEl.textContent = 'Loading dashboard…';
+    contentEl.textContent = 'Loading…';
 
     try {
-      const data = await apiGet('getDashboardSummary');
-      if (data.status !== 'ok') throw new Error(data.message);
-      dashboardData = data;
-      activeKpiPeriod = 'today';
+      const data = await apiGet('getCreditNote', { cnNumber: cnNumber });
+      if (data.status !== 'ok' || !data.found) throw new Error('Not found');
+      currentCN = data.creditNote;
+      currentSupplier = data.creditNote.supplier;
+      document.getElementById('cn-supplier-label').textContent = currentSupplier;
+      const contact = suppliersMap[currentSupplier] || {};
+      currentSupplierContact = { phone: contact.contactPhone || '', email: contact.contactEmail || '' };
       contentEl.className = '';
-      contentEl.innerHTML = dashboardHTML(data);
-      wireDashboard(data);
+      renderCNSummary(currentCN);
     } catch (err) {
       contentEl.className = 'empty-state';
-      contentEl.textContent = 'Could not load dashboard. Check your connection and try again.';
+      contentEl.textContent = 'Could not load this credit note.';
     }
   }
 
-  function dashboardHTML(data) {
-    const pending = data.suppliersDueToday.filter(s => !s.stockCounted);
-    const done = data.suppliersDueToday.filter(s => s.stockCounted);
-
-    return `
-      <div class="kpi-tabs">
-        <div class="kpi-tab active" data-period="today">Today</div>
-        <div class="kpi-tab" data-period="week">This Week</div>
-        <div class="kpi-tab" data-period="month">This Month</div>
-      </div>
-      <div id="kpi-cards"></div>
-
-      ${data.suppliersDueToday.length > 0 ? `
-        <div class="section-label">Order day compliance</div>
-        ${pending.map(s => `
-          <div class="compliance-row">
-            <div class="supplier-name" style="font-size:15px;">${escapeHtml(s.name)}</div>
-            <div class="compliance-status pending">Not counted yet</div>
-          </div>`).join('')}
-        ${done.map(s => `
-          <div class="compliance-row">
-            <div class="supplier-name" style="font-size:15px;">${escapeHtml(s.name)}</div>
-            <div class="compliance-status done">Counted ✓</div>
-          </div>`).join('')}
-      ` : ''}
-
-      ${data.topIngredientsMonth.length > 0 ? `
-        <div class="section-label">Top ingredients this month</div>
-        <div class="material-row">
-          ${data.topIngredientsMonth.map(it => `
-            <div class="rank-row">
-              <div>
-                <div class="rank-name">${escapeHtml(it.name)}</div>
-                <div class="rank-sub">${it.totalQty} units ordered</div>
-              </div>
-              <div class="rank-value">R${it.totalSpend.toFixed(2)}</div>
-            </div>`).join('')}
-        </div>
-      ` : ''}
-
-      ${data.supplierBreakdownMonth.length > 0 ? `
-        <div class="section-label">Supplier spend this month</div>
-        <div class="material-row">
-          ${data.supplierBreakdownMonth.map(s => `
-            <div class="rank-row">
-              <div>
-                <div class="rank-name">${escapeHtml(s.supplier)}</div>
-                <div class="rank-sub">${s.poCount} order${s.poCount === 1 ? '' : 's'}</div>
-              </div>
-              <div class="rank-value">R${s.totalSpend.toFixed(2)}</div>
-            </div>`).join('')}
-        </div>
-      ` : ''}
-    `;
-  }
-
-  function kpiCardsHTML(bucket) {
-    return `
-      <div class="kpi-cards">
-        <div class="kpi-card">
+  // ================= ORDERS TAB =================
+  async function loadOrdersTab() {
+    const contentEl = document.getElementById('orders-content');
+    contentEl.className = 'loading';
+    contentEl.textContent = 'Loading orders…';
+    try {
+      const data = await apiGet('getPurchaseOrders');
+      if (data.status !== 'ok') throw new Error(data.message);
+      if (data.orders.length === 0) {
+        contentEl.className = 'empty-state';
+        contentEl.textContent = 'No purchase orders yet.';
+        return;
+      }
+      contentEl.className = '';
+      contentEl.innerHTML = data.orders.map(po => `
+        <div class="list-row" data-po="${escapeHtml(po.poNumber)}">
           <div>
-            <div class="kpi-card-label">Raw material spend</div>
-            <div class="kpi-card-value">R${bucket.totalSpend.toFixed(2)}</div>
+            <div class="list-row-num">${escapeHtml(po.poNumber)}</div>
+            <div class="list-row-name">${escapeHtml(po.supplier)}</div>
+            <div class="list-row-sub">${formatDateLabel(po.date)}</div>
           </div>
-          <div class="kpi-card-sub">${bucket.poCount} order${bucket.poCount === 1 ? '' : 's'}</div>
-        </div>
-        <div class="kpi-card credit">
           <div>
-            <div class="kpi-card-label">Credit notes issued</div>
-            <div class="kpi-card-value">R${bucket.creditValue.toFixed(2)}</div>
+            <div class="list-row-value">R${po.total.toFixed(2)}</div>
+            <div class="list-row-status">${escapeHtml(po.status || 'Draft')}</div>
           </div>
-          <div class="kpi-card-sub">${bucket.creditCount} note${bucket.creditCount === 1 ? '' : 's'}</div>
-        </div>
-      </div>`;
-  }
-
-  function wireDashboard(data) {
-    document.getElementById('kpi-cards').innerHTML = kpiCardsHTML(data[activeKpiPeriod]);
-    document.querySelectorAll('.kpi-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.kpi-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        activeKpiPeriod = tab.dataset.period;
-        document.getElementById('kpi-cards').innerHTML = kpiCardsHTML(data[activeKpiPeriod]);
+        </div>`).join('');
+      document.querySelectorAll('#orders-content .list-row').forEach(row => {
+        row.addEventListener('click', () => viewPurchaseOrder(row.dataset.po));
       });
-    });
+    } catch (err) {
+      contentEl.className = 'empty-state';
+      contentEl.textContent = 'Could not load orders.';
+    }
   }
 
-  // ---------- Wire up ----------
+  // ================= CREDIT NOTES TAB =================
+  async function loadCreditNotesTab() {
+    const contentEl = document.getElementById('creditnotes-content');
+    contentEl.className = 'loading';
+    contentEl.textContent = 'Loading credit notes…';
+    try {
+      const data = await apiGet('getCreditNotes');
+      if (data.status !== 'ok') throw new Error(data.message);
+      if (data.creditNotes.length === 0) {
+        contentEl.className = 'empty-state';
+        contentEl.textContent = 'No credit notes yet.';
+        return;
+      }
+      contentEl.className = '';
+      contentEl.innerHTML = data.creditNotes.map(cn => `
+        <div class="list-row" data-cn="${escapeHtml(cn.cnNumber)}">
+          <div>
+            <div class="list-row-num">${escapeHtml(cn.cnNumber)}</div>
+            <div class="list-row-name">${escapeHtml(cn.supplier)}</div>
+            <div class="list-row-sub">${formatDateLabel(cn.date)} · ${escapeHtml(cn.poNumber)}</div>
+          </div>
+          <div>
+            <div class="list-row-value">R${cn.total.toFixed(2)}</div>
+            <div class="list-row-status" style="color:${cn.status === 'Resolved' ? 'var(--green)' : 'var(--amber)'};">${escapeHtml(cn.status || 'Draft')}</div>
+          </div>
+        </div>`).join('');
+      document.querySelectorAll('#creditnotes-content .list-row').forEach(row => {
+        row.addEventListener('click', () => viewCreditNote(row.dataset.cn));
+      });
+    } catch (err) {
+      contentEl.className = 'empty-state';
+      contentEl.textContent = 'Could not load credit notes.';
+    }
+  }
+
+  // ================= WIRE UP =================
   document.getElementById('back-btn').addEventListener('click', () => showScreen('suppliers'));
   document.getElementById('save-btn').addEventListener('click', saveStockCount);
   document.getElementById('back-btn-needs').addEventListener('click', () => showScreen('stockcount'));
   document.getElementById('save-order-btn').addEventListener('click', saveOrderPlan);
-  document.getElementById('back-btn-po').addEventListener('click', () => showScreen('needs'));
+  document.getElementById('back-btn-po').addEventListener('click', () => showScreen(poBackTarget === 'orders' ? 'orders' : 'needs'));
   document.getElementById('back-btn-invoice').addEventListener('click', () => showScreen('po'));
   document.getElementById('compare-btn').addEventListener('click', runInvoiceComparison);
-  document.getElementById('back-btn-cn').addEventListener('click', () => showScreen('invoice'));
-  document.getElementById('dashboard-btn').addEventListener('click', openDashboard);
-  document.getElementById('back-btn-dashboard').addEventListener('click', () => showScreen('suppliers'));
+  document.getElementById('back-btn-cn').addEventListener('click', () => showScreen(cnBackTarget === 'creditnotes' ? 'creditnotes' : 'invoice'));
 
-  // ---------- Init ----------
-  showScreen('suppliers');
-  loadSuppliers();
+  document.getElementById('cancel-btn-stockcount').addEventListener('click', goHome);
+  document.getElementById('cancel-btn-needs').addEventListener('click', goHome);
+  document.getElementById('cancel-btn-po').addEventListener('click', goHome);
+  document.getElementById('cancel-btn-invoice').addEventListener('click', goHome);
+  document.getElementById('cancel-btn-cn').addEventListener('click', goHome);
+
+  document.querySelectorAll('.tab-item').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const name = tab.dataset.tab;
+      showScreen(name);
+      if (name === 'dashboard') loadDashboard();
+      else if (name === 'suppliers') loadSuppliers();
+      else if (name === 'orders') loadOrdersTab();
+      else if (name === 'creditnotes') loadCreditNotesTab();
+    });
+  });
+
+  // ================= INIT =================
+  showScreen('dashboard');
+  loadDashboard();
 </script>
 
 </body>
