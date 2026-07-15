@@ -564,6 +564,37 @@
   .po-doc-meta-block strong { display: block; color: var(--white); font-size: 14px; font-weight: 700; margin-top: 2px; }
   .po-doc-business { font-size: 11px; color: var(--silver); opacity: 0.7; margin-top: 14px; line-height: 1.5; }
 
+  /* ---------- Weekday selector (supplier form) ---------- */
+  .weekday-selector { display: flex; gap: 6px; margin-top: 4px; }
+  .weekday-pill {
+    flex: 1; text-align: center; background: var(--white); border: 2px solid var(--silver); border-radius: 10px;
+    padding: 10px 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 13px; color: var(--charcoal);
+    cursor: pointer; user-select: none;
+  }
+  .weekday-pill.selected { background: var(--royal-blue); border-color: var(--royal-blue); color: var(--white); }
+  .weekday-summary {
+    background: var(--white); border-radius: 10px; padding: 10px 12px; margin-top: 10px;
+    font-size: 12.5px; color: var(--charcoal); opacity: 0.75; line-height: 1.6;
+  }
+  .weekday-summary strong { opacity: 1; color: var(--royal-blue); }
+
+  /* ---------- Raw material add/edit/delete ---------- */
+  .material-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .material-edit-btn, .material-delete-btn {
+    flex: 1; border: none; border-radius: 10px; padding: 9px; font-family: 'Poppins', sans-serif;
+    font-weight: 600; font-size: 12.5px; cursor: pointer;
+  }
+  .material-edit-btn { background: var(--white); border: 2px solid var(--charcoal); color: var(--charcoal); }
+  .material-delete-btn { background: var(--white); border: 2px solid var(--red); color: var(--red); }
+  .add-material-card {
+    background: var(--white); border: 2px dashed var(--royal-blue); border-radius: 14px; padding: 16px 18px;
+    margin-bottom: 14px; cursor: pointer; text-align: center; color: var(--royal-blue); font-weight: 700; font-size: 15px;
+  }
+  .material-form { background: var(--platinum); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; }
+  .material-form-fields { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+  .material-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .material-form select.contact-input { -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; padding-right: 34px; }
+
   #screen-stockcount, #screen-needs, #screen-po, #screen-invoice, #screen-cn,
   #screen-orders, #screen-creditnotes { display: none; }
 </style>
@@ -1217,17 +1248,87 @@
     wireSupplierForm('addform', saveNewSupplier, 'add-supplier-form-slot');
   }
 
+  const PRODUCT_LIST = [
+    { code: 'W01', name: 'Braai Wors' }, { code: 'W02', name: 'Ouma' }, { code: 'W03', name: 'Chakalaka' },
+    { code: 'W04', name: 'Superbraai' }, { code: 'W05', name: 'Babalas Wors' }, { code: 'W06', name: 'Boerewors' },
+    { code: 'W07', name: 'Patties' }, { code: 'W08', name: 'Mince' },
+    { code: 'R01', name: 'Russian 6' }, { code: 'R02', name: 'Russian 5' }, { code: 'R03', name: 'Russian 4' },
+    { code: 'R04', name: 'Russian 3' }, { code: 'R05', name: 'Econo Russian' }, { code: 'R06', name: 'Cheese Russian' },
+    { code: 'R07', name: 'Babalas Russian' }, { code: 'R08', name: 'Jumbo Russian' },
+    { code: 'V01', name: 'Vienna' }, { code: 'V02', name: 'Cheese Vienna' },
+    { code: 'P01', name: 'Pizza Toppings' }, { code: 'P02', name: 'Polony Small' }, { code: 'P03', name: 'Polony Med' }, { code: 'P04', name: 'Polony Long' },
+    { code: 'C01', name: 'Chicken Burger' }, { code: 'C02', name: 'Chicken Steak' }, { code: 'C03', name: 'Chicken Nuggets' },
+    { code: 'S01', name: 'Six Gun 20g Small' }, { code: 'S02', name: 'Six Gun 200g Big' }, { code: 'S03', name: 'Chicken Soup Pack' },
+    { code: 'O01', name: 'Heads & Feet' }, { code: 'O02', name: 'Chicken Necks' }, { code: 'O03', name: 'Chicken Livers' }
+  ];
+
+  const WEEKDAYS = [
+    { abbr: 'MON', label: 'Mon', orderDay: 'Fri' },
+    { abbr: 'TUE', label: 'Tue', orderDay: 'Mon' },
+    { abbr: 'WED', label: 'Wed', orderDay: 'Tue' },
+    { abbr: 'THU', label: 'Thu', orderDay: 'Wed' },
+    { abbr: 'FRI', label: 'Fri', orderDay: 'Thu' }
+  ];
+
+  function parseDeliveryDaysToSet(str) {
+    const s = String(str || '').toUpperCase();
+    const set = new Set();
+    WEEKDAYS.forEach(d => { if (s.indexOf(d.abbr) > -1) set.add(d.abbr); });
+    return set;
+  }
+
+  function deriveSupplierFields(selectedAbbrs) {
+    const selected = WEEKDAYS.filter(d => selectedAbbrs.has(d.abbr));
+    const deliveryDays = selected.map(d => d.label).join(' / ');
+    const orderDay = selected.map(d => d.orderDay).join(' / ');
+    const n = selected.length;
+    const frequency = n === 0 ? '' : (n === 1 ? '1x / week' : n + 'x / week');
+    return { deliveryDays, frequency, orderDay };
+  }
+
+  function weekdaySelectorHTML(formId, selectedSet) {
+    return `
+      <div>
+        <div class="field-label">Delivery days</div>
+        <div class="weekday-selector" id="${formId}-weekdays">
+          ${WEEKDAYS.map(d => `<div class="weekday-pill ${selectedSet.has(d.abbr) ? 'selected' : ''}" data-abbr="${d.abbr}">${d.label}</div>`).join('')}
+        </div>
+        <div class="weekday-summary" id="${formId}-summary">Tap the days this supplier delivers</div>
+      </div>`;
+  }
+
+  function updateWeekdaySummary(formId) {
+    const container = document.getElementById(formId + '-weekdays');
+    const selected = new Set();
+    container.querySelectorAll('.weekday-pill.selected').forEach(p => selected.add(p.dataset.abbr));
+    const derived = deriveSupplierFields(selected);
+    const summaryEl = document.getElementById(formId + '-summary');
+    if (selected.size === 0) {
+      summaryEl.textContent = 'Tap the days this supplier delivers';
+    } else {
+      summaryEl.innerHTML = `Delivers <strong>${derived.deliveryDays}</strong> · <strong>${derived.frequency}</strong><br>Order on <strong>${derived.orderDay}</strong>`;
+    }
+    return derived;
+  }
+
+  function wireWeekdaySelector(formId) {
+    document.getElementById(formId + '-weekdays').querySelectorAll('.weekday-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        pill.classList.toggle('selected');
+        updateWeekdaySummary(formId);
+      });
+    });
+    updateWeekdaySummary(formId);
+  }
+
   function supplierFormHTML(cfg) {
+    const selectedSet = parseDeliveryDaysToSet(cfg.deliveryDays);
     return `
       <div class="supplier-form">
         <div class="field-label">${escapeHtml(cfg.title)}</div>
         <div class="supplier-form-fields">
           ${cfg.nameReadonly ? '' : `<input type="text" class="contact-input" id="${cfg.formId}-name" placeholder="Supplier name" value="${escapeHtml(cfg.name)}">`}
-          <div class="supplier-form-row">
-            <input type="text" class="contact-input" id="${cfg.formId}-deliveryDays" placeholder="Delivery days (e.g. Mon / Wed / Fri)" value="${escapeHtml(cfg.deliveryDays)}">
-            <input type="text" class="contact-input" id="${cfg.formId}-frequency" placeholder="Frequency (e.g. 3x / week)" value="${escapeHtml(cfg.frequency)}">
-          </div>
-          <input type="text" class="contact-input" id="${cfg.formId}-orderDay" placeholder="Order day(s) (e.g. Fri / Tue / Thu)" value="${escapeHtml(cfg.orderDay)}">
+          ${weekdaySelectorHTML(cfg.formId, selectedSet)}
           <div class="supplier-form-row">
             <input type="tel" class="contact-input" id="${cfg.formId}-contactPhone" placeholder="Phone" value="${escapeHtml(cfg.contactPhone)}">
             <input type="email" class="contact-input" id="${cfg.formId}-contactEmail" placeholder="Email" value="${escapeHtml(cfg.contactEmail)}">
@@ -1245,15 +1346,17 @@
       document.getElementById(containerId).innerHTML = '';
     });
     document.getElementById(formId + '-save').addEventListener('click', onSave);
+    wireWeekdaySelector(formId);
   }
 
   function readSupplierForm(formId) {
     const nameEl = document.getElementById(formId + '-name');
+    const derived = updateWeekdaySummary(formId);
     return {
       name: nameEl ? nameEl.value.trim() : undefined,
-      deliveryDays: document.getElementById(formId + '-deliveryDays').value.trim(),
-      frequency: document.getElementById(formId + '-frequency').value.trim(),
-      orderDay: document.getElementById(formId + '-orderDay').value.trim(),
+      deliveryDays: derived.deliveryDays,
+      frequency: derived.frequency,
+      orderDay: derived.orderDay,
       contactPhone: document.getElementById(formId + '-contactPhone').value.trim(),
       contactEmail: document.getElementById(formId + '-contactEmail').value.trim()
     };
@@ -1263,6 +1366,7 @@
     const btn = document.getElementById('addform-save');
     const vals = readSupplierForm('addform');
     if (!vals.name) { showToast('Supplier name is required.', true); return; }
+    if (!vals.deliveryDays) { showToast('Select at least one delivery day.', true); return; }
     btn.disabled = true;
     btn.textContent = 'Saving…';
     try {
@@ -1300,25 +1404,27 @@
     document.getElementById('sc-supplier-name').textContent = name;
     document.getElementById('sc-date-label').textContent = formatDateLabel(flowDate);
     showScreen('stockcount');
+    await loadStockCountContent();
+  }
 
+  async function loadStockCountContent() {
     const contentEl = document.getElementById('stockcount-content');
     contentEl.className = 'loading';
     contentEl.textContent = 'Loading raw materials…';
 
     try {
-      const data = await apiGet('getSupplierRawMaterials', { supplier: name });
+      const data = await apiGet('getSupplierRawMaterials', { supplier: currentSupplier });
       if (data.status !== 'ok') throw new Error(data.message || 'Failed to load materials');
 
       currentMaterials = data.materials;
 
-      if (currentMaterials.length === 0) {
-        contentEl.className = 'empty-state';
-        contentEl.textContent = 'No raw materials found for this supplier yet.';
-        return;
-      }
-
+      let html = `<div class="add-material-card" id="add-material-card">+ Add Raw Material</div><div id="add-material-form-slot"></div>`;
+      html += currentMaterials.map((m, i) => materialRowHTML(m, i)).join('');
       contentEl.className = '';
-      contentEl.innerHTML = currentMaterials.map((m, i) => materialRowHTML(m, i)).join('');
+      contentEl.innerHTML = html;
+
+      document.getElementById('add-material-card').addEventListener('click', showAddMaterialForm);
+      wireMaterialActionButtons();
     } catch (err) {
       contentEl.className = 'empty-state';
       contentEl.textContent = 'Could not load raw materials. Check your connection and try again.';
@@ -1353,7 +1459,147 @@
           <div class="field-label">Min stock (${escapeHtml(m.unit)})</div>
           <input type="text" inputmode="decimal" class="minstock-input" data-idx="${idx}" value="${m.minStock || ''}">
         </div>
+        <div class="material-actions">
+          <button class="material-edit-btn" data-idx="${idx}">Edit</button>
+          <button class="material-delete-btn" data-idx="${idx}">Remove from ${escapeHtml(currentSupplier)}</button>
+        </div>
+        <div id="material-edit-form-${idx}"></div>
       </div>`;
+  }
+
+  function wireMaterialActionButtons() {
+    document.querySelectorAll('.material-edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => toggleMaterialEditForm(btn.dataset.idx));
+    });
+    document.querySelectorAll('.material-delete-btn').forEach(btn => {
+      btn.addEventListener('click', () => deleteMaterial(btn.dataset.idx));
+    });
+  }
+
+  function productDropdownHTML(formId, selectedCode) {
+    const options = ['<option value="">— None (not a bought-in item) —</option>']
+      .concat(PRODUCT_LIST.map(p => `<option value="${p.code}" ${p.code === selectedCode ? 'selected' : ''}>${p.code} — ${escapeHtml(p.name)}</option>`));
+    return `<select class="contact-input" id="${formId}-linkedProductCode">${options.join('')}</select>`;
+  }
+
+  function materialFormHTML(cfg) {
+    return `
+      <div class="material-form">
+        <div class="field-label">${escapeHtml(cfg.title)}</div>
+        <div class="material-form-fields">
+          ${cfg.nameReadonly ? '' : `<input type="text" class="contact-input" id="${cfg.formId}-name" placeholder="Raw material name" value="${escapeHtml(cfg.name)}">`}
+          <div class="material-form-row">
+            <input type="text" class="contact-input" id="${cfg.formId}-category" placeholder="Category (e.g. Meat)" value="${escapeHtml(cfg.category)}">
+            <input type="text" class="contact-input" id="${cfg.formId}-unit" placeholder="Unit (e.g. kg)" value="${escapeHtml(cfg.unit)}">
+          </div>
+          <div class="material-form-row">
+            <input type="text" inputmode="decimal" class="contact-input" id="${cfg.formId}-price" placeholder="Price" value="${cfg.price}">
+            <input type="text" inputmode="decimal" class="contact-input" id="${cfg.formId}-minStock" placeholder="Min stock" value="${cfg.minStock}">
+          </div>
+          <div class="field-label" style="margin-top:4px;">Linked product (for bought-in items with no recipe)</div>
+          ${productDropdownHTML(cfg.formId, cfg.linkedProductCode)}
+          <input type="text" inputmode="decimal" class="contact-input" id="${cfg.formId}-bagsPerPack" placeholder="Bags per pack (e.g. 4 bags per box)" value="${cfg.bagsPerPack}">
+        </div>
+        <div class="supplier-form-actions">
+          <button class="supplier-form-cancel" id="${cfg.formId}-cancel">Cancel</button>
+          <button class="supplier-form-save" id="${cfg.formId}-save">Save</button>
+        </div>
+      </div>`;
+  }
+
+  function wireMaterialForm(formId, onSave, containerId) {
+    document.getElementById(formId + '-cancel').addEventListener('click', () => {
+      document.getElementById(containerId).innerHTML = '';
+    });
+    document.getElementById(formId + '-save').addEventListener('click', onSave);
+  }
+
+  function readMaterialForm(formId) {
+    const nameEl = document.getElementById(formId + '-name');
+    return {
+      name: nameEl ? nameEl.value.trim() : undefined,
+      category: document.getElementById(formId + '-category').value.trim(),
+      unit: document.getElementById(formId + '-unit').value.trim(),
+      price: document.getElementById(formId + '-price').value.trim(),
+      minStock: document.getElementById(formId + '-minStock').value.trim(),
+      linkedProductCode: document.getElementById(formId + '-linkedProductCode').value,
+      bagsPerPack: document.getElementById(formId + '-bagsPerPack').value.trim()
+    };
+  }
+
+  function showAddMaterialForm() {
+    const slot = document.getElementById('add-material-form-slot');
+    if (slot.innerHTML.trim() !== '') { slot.innerHTML = ''; return; }
+    slot.innerHTML = materialFormHTML({
+      title: 'New Raw Material for ' + currentSupplier, name: '', nameReadonly: false,
+      category: '', unit: '', price: '', minStock: '', linkedProductCode: '', bagsPerPack: '',
+      formId: 'addmatform'
+    });
+    wireMaterialForm('addmatform', saveNewMaterial, 'add-material-form-slot');
+  }
+
+  function toggleMaterialEditForm(idx) {
+    const slot = document.getElementById('material-edit-form-' + idx);
+    if (!slot) return;
+    if (slot.innerHTML.trim() !== '') { slot.innerHTML = ''; return; }
+    const m = currentMaterials[idx];
+    slot.innerHTML = materialFormHTML({
+      title: 'Edit ' + m.name, name: m.name, nameReadonly: true,
+      category: m.category || '', unit: m.unit || '', price: m.currentPrice || '', minStock: m.minStock || '',
+      linkedProductCode: m.linkedProductCode || '', bagsPerPack: m.bagsPerPack || '',
+      formId: 'editmatform-' + idx
+    });
+    wireMaterialForm('editmatform-' + idx, () => saveMaterialEdit(idx), 'material-edit-form-' + idx);
+  }
+
+  async function saveNewMaterial() {
+    const btn = document.getElementById('addmatform-save');
+    const vals = readMaterialForm('addmatform');
+    if (!vals.name) { showToast('Raw material name is required.', true); return; }
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    try {
+      const data = await apiPost('addRawMaterial', { supplier: currentSupplier, material: vals });
+      if (data.status !== 'ok') throw new Error(data.message);
+      showToast('Raw material added');
+      loadStockCountContent();
+    } catch (err) {
+      showToast(err.message || 'Could not add raw material.', true);
+      btn.disabled = false;
+      btn.textContent = 'Save';
+    }
+  }
+
+  async function saveMaterialEdit(idx) {
+    const formId = 'editmatform-' + idx;
+    const btn = document.getElementById(formId + '-save');
+    const vals = readMaterialForm(formId);
+    const m = currentMaterials[idx];
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    try {
+      const data = await apiPost('updateRawMaterial', { supplier: currentSupplier, rmCode: m.rmCode, material: vals });
+      if (data.status !== 'ok') throw new Error(data.message);
+      showToast('Raw material updated');
+      loadStockCountContent();
+    } catch (err) {
+      showToast('Could not update raw material.', true);
+      btn.disabled = false;
+      btn.textContent = 'Save';
+    }
+  }
+
+  async function deleteMaterial(idx) {
+    const m = currentMaterials[idx];
+    if (!confirm(`Remove ${m.name} from ${currentSupplier}? This only removes it from this supplier, not from the system.`)) return;
+    try {
+      const data = await apiPost('deleteSupplierRawMaterial', { supplier: currentSupplier, rmCode: m.rmCode });
+      if (data.status !== 'ok') throw new Error(data.message);
+      showToast('Removed');
+      loadStockCountContent();
+    } catch (err) {
+      showToast('Could not remove raw material.', true);
+    }
   }
 
   document.addEventListener('input', (e) => {
