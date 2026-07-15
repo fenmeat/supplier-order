@@ -595,6 +595,19 @@
   .material-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .material-form select.contact-input { -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; padding-right: 34px; }
 
+  /* ---------- Elevated Precision polish pass ---------- */
+  .material-row, .supplier-card, .kpi-card, .due-supplier-card, .compare-row, .cn-row,
+  .contact-card, .supplier-form, .material-form, .add-supplier-card, .add-material-card,
+  .po-doc-header, .cn-total-banner, .window-banner, .needs-row, .list-row, .note-item {
+    box-shadow: 0 1px 3px rgba(31, 41, 55, 0.06), 0 1px 2px rgba(31, 41, 55, 0.04);
+  }
+  .po-doc-header, .cn-total-banner { box-shadow: 0 4px 14px rgba(31, 41, 55, 0.18); }
+  .save-btn:not(:disabled), .send-btn:not(:disabled), .generate-cn-btn, .supplier-form-save {
+    box-shadow: 0 2px 8px rgba(0, 60, 255, 0.18);
+  }
+  .send-btn.whatsapp:not(:disabled) { box-shadow: 0 2px 8px rgba(37, 211, 102, 0.25); }
+  .generate-cn-btn { box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2); }
+
   #screen-stockcount, #screen-needs, #screen-po, #screen-invoice, #screen-cn,
   #screen-orders, #screen-creditnotes { display: none; }
 </style>
@@ -812,6 +825,14 @@
   const ROOT_SCREENS = ['dashboard', 'suppliers', 'orders', 'creditnotes'];
   const ALL_SCREENS = ['dashboard', 'suppliers', 'orders', 'creditnotes', 'stockcount', 'needs', 'po', 'invoice', 'cn'];
 
+  // ---------- Rand formatting with thousands separator (e.g. R111 321.60) ----------
+  function formatRand(n) {
+    const num = Number(n) || 0;
+    const parts = num.toFixed(2).split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return 'R' + parts[0] + '.' + parts[1];
+  }
+
   // ---------- Number parsing (handles comma OR period decimal, fixes mobile locale bug) ----------
   function parseNum(str) {
     if (str === null || str === undefined || str === '') return null;
@@ -987,14 +1008,14 @@
     }
 
     if (data.outstandingCreditNotes && data.outstandingCreditNotes.length > 0) {
-      html += `<div class="section-label">Outstanding credit notes (R${data.outstandingCreditNotesTotal.toFixed(2)})</div>`;
+      html += `<div class="section-label">Outstanding credit notes (${formatRand(data.outstandingCreditNotesTotal)})</div>`;
       html += data.outstandingCreditNotes.map(cn => `
         <div class="alert-row credit" data-cn="${escapeHtml(cn.cnNumber)}" style="cursor:pointer;">
           <div>
             <div class="alert-row-name">${escapeHtml(cn.supplier)}</div>
             <div class="alert-row-sub">${escapeHtml(cn.cnNumber)} · ${formatDateLabel(cn.date)}</div>
           </div>
-          <div class="alert-row-value">R${cn.total.toFixed(2)}</div>
+          <div class="alert-row-value">${formatRand(cn.total)}</div>
         </div>`).join('');
     }
 
@@ -1032,7 +1053,7 @@
           <div class="rank-name">${escapeHtml(name)}</div>
           <div class="rank-sub">${escapeHtml(sub)}</div>
         </div>
-        <div class="rank-value">R${value.toFixed(2)}</div>
+        <div class="rank-value">${formatRand(value)}</div>
       </div>`;
   }
 
@@ -1071,14 +1092,14 @@
         <div class="kpi-card">
           <div>
             <div class="kpi-card-label">Raw material spend</div>
-            <div class="kpi-card-value">R${bucket.totalSpend.toFixed(2)}</div>
+            <div class="kpi-card-value">${formatRand(bucket.totalSpend)}</div>
           </div>
           <div class="kpi-card-sub">${bucket.poCount} order${bucket.poCount === 1 ? '' : 's'}</div>
         </div>
         <div class="kpi-card credit">
           <div>
             <div class="kpi-card-label">Credit notes issued</div>
-            <div class="kpi-card-value">R${bucket.creditValue.toFixed(2)}</div>
+            <div class="kpi-card-value">${formatRand(bucket.creditValue)}</div>
           </div>
           <div class="kpi-card-sub">${bucket.creditCount} note${bucket.creditCount === 1 ? '' : 's'}</div>
         </div>
@@ -1764,13 +1785,16 @@
   const BRAND_HEADER = 'FENMEAT — Quality is our priority';
 
   function buildPOMessage(po) {
-    const lines = po.items.map(li => `- ${li.name}: ${li.qty} ${li.unit} @ R${li.price.toFixed(2)} = R${li.lineTotal.toFixed(2)}`);
-    return `${BRAND_HEADER}\n\nPurchase Order ${po.poNumber}\nSupplier: ${po.supplier}\nDate: ${po.date}\n\nItems:\n${lines.join('\n')}\n\nTotal: R${po.total.toFixed(2)}`;
+    const lines = po.items.map(li => `- ${li.name}: ${li.qty} ${li.unit} @ ${formatRand(li.price)} = ${formatRand(li.lineTotal)}`);
+    return `${BRAND_HEADER}\n\nPurchase Order ${po.poNumber}\nSupplier: ${po.supplier}\nDate: ${po.date}\n\nItems:\n${lines.join('\n')}\n\nTotal: ${formatRand(po.total)}`;
   }
+
+  let currentPOSentChannels = new Set();
 
   async function openPurchaseOrder(name) {
     currentSupplier = name;
     poBackTarget = 'needs';
+    currentPOSentChannels = new Set();
     document.getElementById('po-back-label').textContent = 'Needs Calculator';
     document.getElementById('po-supplier-name').textContent = name;
     showScreen('po');
@@ -1816,6 +1840,7 @@
 
   async function viewPurchaseOrder(poNumber) {
     poBackTarget = 'orders';
+    currentPOSentChannels = new Set();
     document.getElementById('po-back-label').textContent = 'Orders';
     showScreen('po');
     const contentEl = document.getElementById('po-content');
@@ -1827,6 +1852,10 @@
       if (data.status !== 'ok' || !data.found) throw new Error('Not found');
       currentPO = data.po;
       currentSupplier = data.po.supplier;
+      const statusMatch = String(data.po.status || '').match(/^Sent \(([^)]*)\)$/);
+      if (statusMatch) {
+        statusMatch[1].split(',').map(s => s.trim()).filter(Boolean).forEach(c => currentPOSentChannels.add(c));
+      }
       document.getElementById('po-supplier-name').textContent = currentSupplier;
       const contact = suppliersMap[currentSupplier] || {};
       currentSupplierContact = { phone: contact.contactPhone || '', email: contact.contactEmail || '' };
@@ -1845,9 +1874,9 @@
       <div class="po-line">
         <div>
           <div class="po-line-name">${escapeHtml(li.name)}</div>
-          <div class="po-line-qty">${li.qty} ${escapeHtml(li.unit)} @ R${Number(li.price).toFixed(2)}</div>
+          <div class="po-line-qty">${li.qty} ${escapeHtml(li.unit)} @ ${formatRand(Number(li.price))}</div>
         </div>
-        <div class="po-line-value">R${Number(li.lineTotal).toFixed(2)}</div>
+        <div class="po-line-value">${formatRand(Number(li.lineTotal))}</div>
       </div>`).join('');
 
     const hasPhone = !!currentSupplierContact.phone;
@@ -1865,7 +1894,7 @@
       </div>
 
       <div class="po-total-label" style="text-align:center;">Total value</div>
-      <div class="po-total" style="text-align:center; color:var(--charcoal); margin-bottom:18px;">R${Number(po.total).toFixed(2)}</div>
+      <div class="po-total" style="text-align:center; color:var(--charcoal); margin-bottom:18px;">${formatRand(Number(po.total))}</div>
 
       <div class="section-label">Line items</div>
       <div class="po-lines">${linesHTML}</div>
@@ -1884,7 +1913,7 @@
         <button class="send-btn whatsapp" id="send-whatsapp-btn" ${hasPhone ? '' : 'disabled'}>Send via WhatsApp</button>
         <button class="send-btn email" id="send-email-btn" ${hasEmail ? '' : 'disabled'}>Send via Email</button>
       </div>
-      <div class="send-hint">${(!hasPhone || !hasEmail) ? 'Add a phone number / email above to enable sending.' : 'Opens WhatsApp or your email app with the order pre-filled.'}</div>
+      <div class="send-hint">${(!hasPhone || !hasEmail) ? 'Add a phone number / email above to enable sending.' : 'WhatsApp opens with a link to the PDF · Email sends the PDF as an attachment directly.'}</div>
       <div id="po-status-pill"></div>
 
       <div class="section-label">Supplier notes</div>
@@ -1904,6 +1933,7 @@
     if (emailBtn) emailBtn.addEventListener('click', () => sendPO('email'));
     document.getElementById('add-note-btn').addEventListener('click', addSupplierNote);
     document.getElementById('check-invoice-btn').addEventListener('click', () => openInvoiceCheck(currentPO));
+    renderSentPills();
     loadSupplierNotes();
   }
 
@@ -1932,24 +1962,49 @@
     }
   }
 
-  function sendPO(channel) {
-    if (!currentPO) return;
-    const message = buildPOMessage(currentPO);
-
-    if (channel === 'whatsapp') {
-      const phone = toWhatsAppPhone(currentSupplierContact.phone);
-      if (!phone) { showToast('Add a phone number first.', true); return; }
-      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
-    } else {
-      const email = currentSupplierContact.email;
-      if (!email) { showToast('Add an email address first.', true); return; }
-      const subject = `FenMeat Purchase Order ${currentPO.poNumber}`;
-      window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
-    }
-
-    apiPost('markPurchaseOrderSent', { poNumber: currentPO.poNumber, channel: channel }).catch(() => {});
+  function renderSentPills() {
     const pill = document.getElementById('po-status-pill');
-    if (pill) pill.innerHTML = `<div class="status-pill">Sent via ${channel === 'whatsapp' ? 'WhatsApp' : 'Email'}</div>`;
+    if (!pill) return;
+    pill.innerHTML = Array.from(currentPOSentChannels).map(c =>
+      `<div class="status-pill" style="margin-right:6px;">Sent via ${c === 'whatsapp' ? 'WhatsApp' : 'Email'}</div>`
+    ).join('');
+  }
+
+  async function sendPO(channel) {
+    if (!currentPO) return;
+    const btnId = channel === 'whatsapp' ? 'send-whatsapp-btn' : 'send-email-btn';
+    const btn = document.getElementById(btnId);
+    const originalLabel = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Preparing PDF…'; }
+
+    try {
+      if (channel === 'whatsapp') {
+        const phone = toWhatsAppPhone(currentSupplierContact.phone);
+        if (!phone) { showToast('Add a phone number first.', true); return; }
+
+        const pdfData = await apiPost('generatePurchaseOrderPDF', { poNumber: currentPO.poNumber });
+        if (pdfData.status !== 'ok') throw new Error(pdfData.message || 'Could not generate PDF');
+
+        const message = buildPOMessage(currentPO) + `\n\nView/download PDF:\n${pdfData.pdfUrl}`;
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+      } else {
+        const email = currentSupplierContact.email;
+        if (!email) { showToast('Add an email address first.', true); return; }
+        if (btn) btn.textContent = 'Sending…';
+
+        const sendData = await apiPost('sendPurchaseOrderEmailWithPDF', { poNumber: currentPO.poNumber, recipientEmail: email });
+        if (sendData.status !== 'ok') throw new Error(sendData.message || 'Could not send email');
+      }
+
+      currentPOSentChannels.add(channel);
+      renderSentPills();
+      await apiPost('markPurchaseOrderSent', { poNumber: currentPO.poNumber, channel: channel }).catch(() => {});
+      showToast(channel === 'whatsapp' ? 'WhatsApp opened with PDF link' : 'Email sent with PDF attached');
+    } catch (err) {
+      showToast(err.message || 'Could not send.', true);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = originalLabel; }
+    }
   }
 
   // ================= SUPPLIER NOTES =================
@@ -2050,7 +2105,7 @@
         <div class="compare-header">
           <div>
             <div class="material-name">${escapeHtml(r.name)}</div>
-            <div class="compare-po-info">${r.isExtra ? 'Not on original PO' : 'PO: ' + r.poQty + ' @ R' + r.poPrice.toFixed(2)}</div>
+            <div class="compare-po-info">${r.isExtra ? 'Not on original PO' : 'PO: ' + r.poQty + ' @ ' + formatRand(r.poPrice)}</div>
           </div>
         </div>
         <div class="compare-fields">
@@ -2143,8 +2198,8 @@
           <div>
             <div class="material-name">${escapeHtml(it.name)}</div>
             <div class="compare-po-info">
-              ${it.status === 'EXTRA_ON_INVOICE' ? '' : 'PO: ' + it.poQty + ' @ R' + it.poPrice.toFixed(2) + ' &nbsp;·&nbsp; '}
-              Invoice: ${it.invoiceQty != null ? it.invoiceQty : '—'} @ R${it.invoicePrice != null ? it.invoicePrice.toFixed(2) : '—'}
+              ${it.status === 'EXTRA_ON_INVOICE' ? '' : 'PO: ' + it.poQty + ' @ ' + formatRand(it.poPrice) + ' &nbsp;·&nbsp; '}
+              Invoice: ${it.invoiceQty != null ? it.invoiceQty : '—'} @ ${it.invoicePrice != null ? formatRand(it.invoicePrice) : '—'}
             </div>
           </div>
           <div class="status-badge ${statusClass(it.status)}">${statusLabel(it.status)}</div>
@@ -2217,7 +2272,7 @@
           <input type="checkbox" class="cn-checkbox" data-idx="${idx}" ${checked ? 'checked' : ''}>
           <div class="cn-row-info">
             <div class="material-name">${escapeHtml(it.name)}</div>
-            <div class="cn-row-status">${statusLabel(it.status)} · PO R${it.poPrice.toFixed(2)} → Invoice R${it.invoicePrice != null ? it.invoicePrice.toFixed(2) : '—'}</div>
+            <div class="cn-row-status">${statusLabel(it.status)} · PO ${formatRand(it.poPrice)} → Invoice ${it.invoicePrice != null ? formatRand(it.invoicePrice) : '—'}</div>
           </div>
         </div>
         <div class="cn-amount-field">
@@ -2235,7 +2290,7 @@
         total += amt ? parseNumOr0(amt.value) : 0;
       }
     });
-    document.getElementById('cn-running-total').textContent = 'R' + total.toFixed(2);
+    document.getElementById('cn-running-total').textContent = formatRand(total);
   }
 
   async function createCreditNoteFromBuilder(discrepant) {
@@ -2263,6 +2318,7 @@
       const data = await apiPost('createCreditNote', { date: todayISO(), supplier: currentSupplier, poNumber: currentPO.poNumber, items: rows });
       if (data.status !== 'ok') throw new Error(data.message);
       currentCN = data;
+      currentCNSentChannels = new Set();
       renderCNSummary(data);
     } catch (err) {
       showToast('Could not create credit note.', true);
@@ -2272,8 +2328,8 @@
   }
 
   function buildCNMessage(cn) {
-    const lines = cn.items.map(it => `- ${it.name}: R${Number(it.creditAmount).toFixed(2)} (${statusLabel(it.status)})`);
-    return `${BRAND_HEADER}\n\nCredit Note ${cn.cnNumber}\nSupplier: ${cn.supplier}\nRelated PO: ${cn.poNumber}\nDate: ${cn.date}\n\nItems:\n${lines.join('\n')}\n\nTotal credit due: R${cn.total.toFixed(2)}`;
+    const lines = cn.items.map(it => `- ${it.name}: ${formatRand(Number(it.creditAmount))} (${statusLabel(it.status)})`);
+    return `${BRAND_HEADER}\n\nCredit Note ${cn.cnNumber}\nSupplier: ${cn.supplier}\nRelated PO: ${cn.poNumber}\nDate: ${cn.date}\n\nItems:\n${lines.join('\n')}\n\nTotal credit due: ${formatRand(cn.total)}`;
   }
 
   function renderCNSummary(cn) {
@@ -2284,7 +2340,7 @@
           <div class="po-line-name">${escapeHtml(it.name)}</div>
           <div class="po-line-qty">${statusLabel(it.status)}</div>
         </div>
-        <div class="po-line-value">R${Number(it.creditAmount).toFixed(2)}</div>
+        <div class="po-line-value">${formatRand(Number(it.creditAmount))}</div>
       </div>`).join('');
 
     const hasPhone = !!currentSupplierContact.phone;
@@ -2295,7 +2351,7 @@
       <div class="po-banner">
         <div class="po-number">${escapeHtml(cn.cnNumber)}${cn.status ? ' · ' + escapeHtml(cn.status) : ''}</div>
         <div class="po-total-label">Credit total</div>
-        <div class="po-total">R${Number(cn.total).toFixed(2)}</div>
+        <div class="po-total">${formatRand(Number(cn.total))}</div>
       </div>
       <div class="section-label">Items</div>
       <div class="po-lines">${linesHTML}</div>
@@ -2315,6 +2371,13 @@
     if (emailBtn) emailBtn.addEventListener('click', () => sendCN('email'));
     const resolveBtn = document.getElementById('mark-resolved-btn');
     if (resolveBtn) resolveBtn.addEventListener('click', markCNResolved);
+
+    const cnPill = document.getElementById('cn-status-pill');
+    if (cnPill && currentCNSentChannels.size > 0) {
+      cnPill.innerHTML = Array.from(currentCNSentChannels).map(c =>
+        `<div class="status-pill" style="margin-right:6px;">Sent via ${c === 'whatsapp' ? 'WhatsApp' : 'Email'}</div>`
+      ).join('');
+    }
   }
 
   async function markCNResolved() {
@@ -2335,6 +2398,8 @@
     }
   }
 
+  let currentCNSentChannels = new Set();
+
   async function sendCN(channel) {
     if (!currentCN) return;
     const message = buildCNMessage(currentCN);
@@ -2350,11 +2415,14 @@
       window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
     }
 
+    currentCNSentChannels.add(channel);
     try {
       const data = await apiPost('markCreditNoteSent', { cnNumber: currentCN.cnNumber, channel: channel, supplier: currentSupplier, total: currentCN.total, followUpDays: 3 });
       const pill = document.getElementById('cn-status-pill');
       if (pill) {
-        pill.innerHTML = `<div class="status-pill">Sent via ${channel === 'whatsapp' ? 'WhatsApp' : 'Email'}</div>` +
+        pill.innerHTML = Array.from(currentCNSentChannels).map(c =>
+          `<div class="status-pill" style="margin-right:6px;">Sent via ${c === 'whatsapp' ? 'WhatsApp' : 'Email'}</div>`
+        ).join('') +
           (data.reminderCreated ? `<div class="status-pill" style="background:var(--royal-blue); margin-left:6px;">Reminder set for 3 days</div>` : '');
       }
     } catch (err) { /* sending already happened client-side */ }
@@ -2373,6 +2441,11 @@
       if (data.status !== 'ok' || !data.found) throw new Error('Not found');
       currentCN = data.creditNote;
       currentSupplier = data.creditNote.supplier;
+      currentCNSentChannels = new Set();
+      const cnStatusMatch = String(data.creditNote.status || '').match(/^Sent \(([^)]*)\)$/);
+      if (cnStatusMatch) {
+        cnStatusMatch[1].split(',').map(s => s.trim()).filter(Boolean).forEach(c => currentCNSentChannels.add(c));
+      }
       document.getElementById('cn-supplier-label').textContent = currentSupplier;
       const contact = suppliersMap[currentSupplier] || {};
       currentSupplierContact = { phone: contact.contactPhone || '', email: contact.contactEmail || '' };
@@ -2406,7 +2479,7 @@
             <div class="list-row-sub">${formatDateLabel(po.date)}</div>
           </div>
           <div>
-            <div class="list-row-value">R${po.total.toFixed(2)}</div>
+            <div class="list-row-value">${formatRand(po.total)}</div>
             <div class="list-row-status">${escapeHtml(po.status || 'Draft')}</div>
           </div>
         </div>`).join('');
@@ -2441,7 +2514,7 @@
             <div class="list-row-sub">${formatDateLabel(cn.date)} · ${escapeHtml(cn.poNumber)}</div>
           </div>
           <div>
-            <div class="list-row-value">R${cn.total.toFixed(2)}</div>
+            <div class="list-row-value">${formatRand(cn.total)}</div>
             <div class="list-row-status" style="color:${cn.status === 'Resolved' ? 'var(--green)' : 'var(--amber)'};">${escapeHtml(cn.status || 'Draft')}</div>
           </div>
         </div>`).join('');
