@@ -500,6 +500,70 @@
   .list-row-value { font-size: 15px; font-weight: 700; color: var(--charcoal); text-align: right; }
   .list-row-status { font-size: 10.5px; font-weight: 700; text-transform: uppercase; margin-top: 4px; color: var(--green); }
 
+  /* ---------- Dashboard date picker ---------- */
+  .date-picker-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    background: var(--platinum); border-radius: 12px; padding: 10px 14px; margin-bottom: 14px;
+  }
+  .date-picker-label { font-size: 12px; font-weight: 600; color: var(--charcoal); opacity: 0.6; text-transform: uppercase; letter-spacing: 0.3px; }
+  .date-picker-input {
+    border: 2px solid var(--silver); border-radius: 8px; background: var(--white); font-family: 'Poppins', sans-serif;
+    font-weight: 600; color: var(--charcoal); padding: 7px 10px; font-size: 14px;
+  }
+  .date-picker-today-btn {
+    background: none; border: none; color: var(--royal-blue); font-weight: 600; font-size: 12.5px; cursor: pointer; text-decoration: underline;
+  }
+
+  /* ---------- Add / Edit Supplier ---------- */
+  .add-supplier-card {
+    background: var(--white); border: 2px dashed var(--royal-blue); border-radius: 14px; padding: 16px 18px;
+    margin-bottom: 14px; cursor: pointer; text-align: center; color: var(--royal-blue); font-weight: 700; font-size: 15px;
+  }
+  .edit-supplier-btn {
+    background: none; border: none; color: var(--charcoal); opacity: 0.4; cursor: pointer; padding: 6px; flex-shrink: 0;
+  }
+  .edit-supplier-btn svg { width: 18px; height: 18px; }
+  .supplier-card-row { display: flex; align-items: center; gap: 4px; }
+
+  .supplier-form { background: var(--platinum); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; }
+  .supplier-form-fields { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+  .supplier-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .supplier-form-actions { display: flex; gap: 10px; margin-top: 12px; }
+  .supplier-form-save { flex: 1; background: var(--royal-blue); color: var(--white); border: none; border-radius: 10px; padding: 12px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; }
+  .supplier-form-cancel { flex: 1; background: var(--white); color: var(--charcoal); border: 2px solid var(--silver); border-radius: 10px; padding: 12px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; }
+
+  /* ---------- Min Stock field ---------- */
+  .minstock-row { margin-top: 10px; }
+  .minstock-input {
+    width: 100%; border: 2px solid var(--silver); border-radius: 10px; background: var(--white);
+    font-family: 'Poppins', sans-serif; font-weight: 600; color: var(--charcoal); padding: 9px 10px; font-size: 15px;
+  }
+  .minstock-input:focus { outline: none; border-color: var(--royal-blue); }
+
+  /* ---------- Extra days control (Needs Calculator) ---------- */
+  .extra-days-row {
+    display: flex; align-items: center; gap: 10px; background: var(--platinum);
+    border-radius: 12px; padding: 12px 14px; margin-bottom: 18px;
+  }
+  .extra-days-input {
+    width: 60px; border: 2px solid var(--silver); border-radius: 8px; background: var(--white);
+    font-family: 'Poppins', sans-serif; font-weight: 700; color: var(--charcoal); padding: 8px 10px; font-size: 15px; text-align: center;
+  }
+  .extra-days-input:focus { outline: none; border-color: var(--royal-blue); }
+  .recalc-btn {
+    background: var(--charcoal); color: var(--white); border: none; border-radius: 8px; padding: 9px 14px;
+    font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 13px; cursor: pointer;
+  }
+
+  /* ---------- Polished PO document header ---------- */
+  .po-doc-header { background: var(--charcoal); border-radius: 16px; padding: 24px 22px; margin-bottom: 18px; text-align: center; }
+  .po-doc-logo { height: 56px; margin-bottom: 14px; }
+  .po-doc-title { font-size: 13px; font-weight: 700; color: var(--silver); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
+  .po-doc-meta { display: flex; justify-content: space-between; text-align: left; border-top: 1px solid #374151; padding-top: 14px; margin-top: 6px; }
+  .po-doc-meta-block { font-size: 12px; color: var(--silver); }
+  .po-doc-meta-block strong { display: block; color: var(--white); font-size: 14px; font-weight: 700; margin-top: 2px; }
+  .po-doc-business { font-size: 11px; color: var(--silver); opacity: 0.7; margin-top: 14px; line-height: 1.5; }
+
   #screen-stockcount, #screen-needs, #screen-po, #screen-invoice, #screen-cn,
   #screen-orders, #screen-creditnotes { display: none; }
 </style>
@@ -796,6 +860,10 @@
   let activeKpiPeriod = 'today';
   let poBackTarget = 'needs'; // 'needs' or 'orders'
   let cnBackTarget = 'invoice'; // 'invoice' or 'creditnotes'
+  let flowDate = todayISO(); // the date Stock Count / Needs Calculator / PO operate on
+  let dashboardSelectedDate = todayISO(); // date picked in the Dashboard's "due suppliers" section
+
+  function setFlowDate(d) { flowDate = d; }
 
   // ---------- Screen switching ----------
   function showScreen(name) {
@@ -860,9 +928,20 @@
     `;
 
     if (data.suppliersDueToday.length > 0) {
-      html += `<div class="section-label">Suppliers due today — tap for quick actions</div>`;
-      html += data.suppliersDueToday.map((s, i) => dueSupplierCardHTML(s, i)).join('');
+      html += `<div class="section-label">Suppliers due — tap for quick actions</div>`;
+    } else {
+      html += `<div class="section-label">Suppliers due</div>`;
     }
+    html += `
+      <div class="date-picker-row">
+        <div>
+          <div class="date-picker-label">Showing</div>
+          <input type="date" class="date-picker-input" id="dash-date-picker" value="${dashboardSelectedDate}">
+        </div>
+        <button class="date-picker-today-btn" id="dash-date-today-btn">Today</button>
+      </div>
+      <div id="due-suppliers-section" class="loading" style="padding:20px 0;">Loading…</div>
+    `;
 
     if (data.lowStockAlerts && data.lowStockAlerts.length > 0) {
       html += `<div class="section-label">Low stock alerts</div>`;
@@ -975,6 +1054,54 @@
       </div>`;
   }
 
+  async function loadDueSuppliersSection(dateStr) {
+    dashboardSelectedDate = dateStr;
+    const sectionEl = document.getElementById('due-suppliers-section');
+    if (!sectionEl) return;
+    sectionEl.className = 'loading';
+    sectionEl.style.padding = '20px 0';
+    sectionEl.textContent = 'Loading…';
+    try {
+      const data = await apiGet('getSupplierStatusForDate', { date: dateStr });
+      if (data.status !== 'ok') throw new Error(data.message);
+      const due = data.suppliers.filter(s => s.dueOnDate);
+      if (due.length === 0) {
+        sectionEl.className = 'empty-state';
+        sectionEl.style.padding = '30px 0';
+        sectionEl.textContent = 'No suppliers due on this date.';
+        return;
+      }
+      sectionEl.className = '';
+      sectionEl.style.padding = '';
+      sectionEl.innerHTML = due.map((s, i) => dueSupplierCardHTML(s, i)).join('');
+      wireDueSupplierCards();
+    } catch (err) {
+      sectionEl.className = 'empty-state';
+      sectionEl.textContent = 'Could not load suppliers for this date.';
+    }
+  }
+
+  function wireDueSupplierCards() {
+    document.querySelectorAll('.due-supplier-head').forEach(head => {
+      head.addEventListener('click', () => {
+        const idx = head.dataset.idx;
+        document.getElementById('due-actions-' + idx).classList.toggle('expanded');
+      });
+    });
+    document.querySelectorAll('.quick-action-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const name = btn.dataset.name;
+        const action = btn.dataset.action;
+        currentSupplier = name;
+        setFlowDate(dashboardSelectedDate);
+        if (action === 'stockcount') openSupplier(name);
+        else if (action === 'needs') openNeedsCalculator(name);
+        else if (action === 'po') { poBackTarget = 'needs'; openPurchaseOrder(name); }
+      });
+    });
+  }
+
   function wireDashboard(data) {
     document.getElementById('kpi-cards').innerHTML = kpiCardsHTML(data[activeKpiPeriod]);
     document.querySelectorAll('.kpi-tab').forEach(tab => {
@@ -986,23 +1113,15 @@
       });
     });
 
-    document.querySelectorAll('.due-supplier-head').forEach(head => {
-      head.addEventListener('click', () => {
-        const idx = head.dataset.idx;
-        document.getElementById('due-actions-' + idx).classList.toggle('expanded');
-      });
-    });
+    dashboardSelectedDate = todayISO();
+    loadDueSuppliersSection(dashboardSelectedDate);
 
-    document.querySelectorAll('.quick-action-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const name = btn.dataset.name;
-        const action = btn.dataset.action;
-        currentSupplier = name;
-        if (action === 'stockcount') openSupplier(name);
-        else if (action === 'needs') openNeedsCalculator(name);
-        else if (action === 'po') { poBackTarget = 'needs'; openPurchaseOrder(name); }
-      });
+    document.getElementById('dash-date-picker').addEventListener('change', (e) => {
+      if (e.target.value) loadDueSuppliersSection(e.target.value);
+    });
+    document.getElementById('dash-date-today-btn').addEventListener('click', () => {
+      document.getElementById('dash-date-picker').value = todayISO();
+      loadDueSuppliersSection(todayISO());
     });
 
     document.querySelectorAll('.alert-row.credit').forEach(row => {
@@ -1024,45 +1143,162 @@
       suppliersMap = {};
       data.suppliers.forEach(s => { suppliersMap[s.name] = s; });
 
-      let html = '';
+      let html = `<div class="add-supplier-card" id="add-supplier-card">+ Add Supplier</div><div id="add-supplier-form-slot"></div>`;
       if (due.length > 0) {
         html += `<div class="section-label">Order today</div>`;
-        due.forEach(s => { html += supplierCardHTML(s, true); });
+        due.forEach((s, i) => { html += supplierCardHTML(s, true, 'due' + i); });
       }
       html += `<div class="section-label">${due.length > 0 ? 'Other suppliers' : 'All suppliers'}</div>`;
-      notDue.forEach(s => { html += supplierCardHTML(s, false); });
+      notDue.forEach((s, i) => { html += supplierCardHTML(s, false, 'notdue' + i); });
 
       contentEl.className = '';
       contentEl.innerHTML = html;
 
       document.querySelectorAll('.supplier-card').forEach(card => {
-        card.addEventListener('click', () => openSupplier(card.dataset.name));
+        card.addEventListener('click', () => { setFlowDate(todayISO()); openSupplier(card.dataset.name); });
       });
+      document.querySelectorAll('.edit-supplier-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleSupplierEditForm(btn.dataset.key, btn.dataset.name);
+        });
+      });
+      document.getElementById('add-supplier-card').addEventListener('click', showAddSupplierForm);
     } catch (err) {
       contentEl.className = 'empty-state';
       contentEl.textContent = 'Could not load suppliers. Check your connection and try again.';
     }
   }
 
-  function supplierCardHTML(s, isDue) {
+  function supplierCardHTML(s, isDue, key) {
     return `
-      <div class="supplier-card ${isDue ? 'due' : 'quiet'}" data-name="${escapeHtml(s.name)}">
-        <div class="supplier-info">
-          <div class="supplier-name">${escapeHtml(s.name)}</div>
-          <div class="supplier-meta">${escapeHtml(s.deliveryDays)} · ${escapeHtml(s.frequency)}</div>
+      <div class="supplier-card-row">
+        <div class="supplier-card ${isDue ? 'due' : 'quiet'}" data-name="${escapeHtml(s.name)}" style="flex:1;">
+          <div class="supplier-info">
+            <div class="supplier-name">${escapeHtml(s.name)}</div>
+            <div class="supplier-meta">${escapeHtml(s.deliveryDays)} · ${escapeHtml(s.frequency)}</div>
+          </div>
+          ${isDue
+            ? `<div class="due-tag">Order today</div>`
+            : `<svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`
+          }
         </div>
-        ${isDue
-          ? `<div class="due-tag">Order today</div>`
-          : `<svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`
-        }
+        <button class="edit-supplier-btn" data-key="${key}" data-name="${escapeHtml(s.name)}" title="Edit supplier">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+      </div>
+      <div id="edit-form-${key}"></div>
+    `;
+  }
+
+  function toggleSupplierEditForm(key, name) {
+    const slot = document.getElementById('edit-form-' + key);
+    if (!slot) return;
+    if (slot.innerHTML.trim() !== '') { slot.innerHTML = ''; return; }
+    const s = suppliersMap[name] || {};
+    slot.innerHTML = supplierFormHTML({
+      title: 'Edit ' + name,
+      name: name, nameReadonly: true,
+      deliveryDays: s.deliveryDays || '', frequency: s.frequency || '', orderDay: s.orderDay || '',
+      contactPhone: s.contactPhone || '', contactEmail: s.contactEmail || '',
+      formId: 'editform-' + key
+    });
+    wireSupplierForm('editform-' + key, () => saveSupplierEdit(key, name), 'edit-form-' + key);
+  }
+
+  function showAddSupplierForm() {
+    const slot = document.getElementById('add-supplier-form-slot');
+    if (slot.innerHTML.trim() !== '') { slot.innerHTML = ''; return; }
+    slot.innerHTML = supplierFormHTML({
+      title: 'New Supplier', name: '', nameReadonly: false,
+      deliveryDays: '', frequency: '', orderDay: '', contactPhone: '', contactEmail: '',
+      formId: 'addform'
+    });
+    wireSupplierForm('addform', saveNewSupplier, 'add-supplier-form-slot');
+  }
+
+  function supplierFormHTML(cfg) {
+    return `
+      <div class="supplier-form">
+        <div class="field-label">${escapeHtml(cfg.title)}</div>
+        <div class="supplier-form-fields">
+          ${cfg.nameReadonly ? '' : `<input type="text" class="contact-input" id="${cfg.formId}-name" placeholder="Supplier name" value="${escapeHtml(cfg.name)}">`}
+          <div class="supplier-form-row">
+            <input type="text" class="contact-input" id="${cfg.formId}-deliveryDays" placeholder="Delivery days (e.g. Mon / Wed / Fri)" value="${escapeHtml(cfg.deliveryDays)}">
+            <input type="text" class="contact-input" id="${cfg.formId}-frequency" placeholder="Frequency (e.g. 3x / week)" value="${escapeHtml(cfg.frequency)}">
+          </div>
+          <input type="text" class="contact-input" id="${cfg.formId}-orderDay" placeholder="Order day(s) (e.g. Fri / Tue / Thu)" value="${escapeHtml(cfg.orderDay)}">
+          <div class="supplier-form-row">
+            <input type="tel" class="contact-input" id="${cfg.formId}-contactPhone" placeholder="Phone" value="${escapeHtml(cfg.contactPhone)}">
+            <input type="email" class="contact-input" id="${cfg.formId}-contactEmail" placeholder="Email" value="${escapeHtml(cfg.contactEmail)}">
+          </div>
+        </div>
+        <div class="supplier-form-actions">
+          <button class="supplier-form-cancel" id="${cfg.formId}-cancel">Cancel</button>
+          <button class="supplier-form-save" id="${cfg.formId}-save">Save</button>
+        </div>
       </div>`;
+  }
+
+  function wireSupplierForm(formId, onSave, containerId) {
+    document.getElementById(formId + '-cancel').addEventListener('click', () => {
+      document.getElementById(containerId).innerHTML = '';
+    });
+    document.getElementById(formId + '-save').addEventListener('click', onSave);
+  }
+
+  function readSupplierForm(formId) {
+    const nameEl = document.getElementById(formId + '-name');
+    return {
+      name: nameEl ? nameEl.value.trim() : undefined,
+      deliveryDays: document.getElementById(formId + '-deliveryDays').value.trim(),
+      frequency: document.getElementById(formId + '-frequency').value.trim(),
+      orderDay: document.getElementById(formId + '-orderDay').value.trim(),
+      contactPhone: document.getElementById(formId + '-contactPhone').value.trim(),
+      contactEmail: document.getElementById(formId + '-contactEmail').value.trim()
+    };
+  }
+
+  async function saveNewSupplier() {
+    const btn = document.getElementById('addform-save');
+    const vals = readSupplierForm('addform');
+    if (!vals.name) { showToast('Supplier name is required.', true); return; }
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    try {
+      const data = await apiPost('addSupplier', { supplier: vals });
+      if (data.status !== 'ok') throw new Error(data.message);
+      showToast('Supplier added');
+      loadSuppliers();
+    } catch (err) {
+      showToast(err.message || 'Could not add supplier.', true);
+      btn.disabled = false;
+      btn.textContent = 'Save';
+    }
+  }
+
+  async function saveSupplierEdit(key, originalName) {
+    const btn = document.getElementById('editform-' + key + '-save');
+    const vals = readSupplierForm('editform-' + key);
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    try {
+      const data = await apiPost('updateSupplier', { originalName: originalName, supplier: vals });
+      if (data.status !== 'ok') throw new Error(data.message);
+      showToast('Supplier updated');
+      loadSuppliers();
+    } catch (err) {
+      showToast('Could not update supplier.', true);
+      btn.disabled = false;
+      btn.textContent = 'Save';
+    }
   }
 
   // ================= STOCK COUNT =================
   async function openSupplier(name) {
     currentSupplier = name;
     document.getElementById('sc-supplier-name').textContent = name;
-    document.getElementById('sc-date-label').textContent = todayDisplay();
+    document.getElementById('sc-date-label').textContent = formatDateLabel(flowDate);
     showScreen('stockcount');
 
     const contentEl = document.getElementById('stockcount-content');
@@ -1102,7 +1338,7 @@
           <div class="field-block">
             <div class="field-label">Qty counted</div>
             <input type="text" inputmode="decimal" class="qty-input" data-idx="${idx}" placeholder="0">
-            <div class="unit-hint">${escapeHtml(m.unit)}${m.minStock ? ' · min stock ' + m.minStock : ''}</div>
+            <div class="unit-hint">${escapeHtml(m.unit)}</div>
           </div>
           <div class="field-block">
             <div class="field-label">Price / ${escapeHtml(m.unit)}</div>
@@ -1112,6 +1348,10 @@
             </div>
             <div class="price-updated-badge" data-idx="${idx}">Price updated</div>
           </div>
+        </div>
+        <div class="minstock-row">
+          <div class="field-label">Min stock (${escapeHtml(m.unit)})</div>
+          <input type="text" inputmode="decimal" class="minstock-input" data-idx="${idx}" value="${m.minStock || ''}">
         </div>
       </div>`;
   }
@@ -1138,19 +1378,24 @@
     const rows = currentMaterials.map((m, i) => {
       const qtyEl = document.querySelector(`.qty-input[data-idx="${i}"]`);
       const priceEl = document.querySelector(`.price-input[data-idx="${i}"]`);
+      const minStockEl = document.querySelector(`.minstock-input[data-idx="${i}"]`);
       return {
         rmCode: m.rmCode,
         name: m.name,
         qtyCounted: qtyEl ? parseNumOr0(qtyEl.value) : 0,
-        price: priceEl && priceEl.value !== '' ? parseNumOr0(priceEl.value) : ''
+        price: priceEl && priceEl.value !== '' ? parseNumOr0(priceEl.value) : '',
+        minStock: minStockEl && minStockEl.value !== '' ? parseNumOr0(minStockEl.value) : ''
       };
     });
 
     try {
-      const data = await apiPost('writeRawStockCount', { date: todayISO(), supplier: currentSupplier, rows });
+      const data = await apiPost('writeRawStockCount', { date: flowDate, supplier: currentSupplier, rows });
       if (data.status !== 'ok') throw new Error(data.message || 'Save failed');
 
-      showToast(`Saved · ${data.saved} items` + (data.pricesUpdated ? ` · ${data.pricesUpdated} prices updated` : ''));
+      let msg = `Saved · ${data.saved} items`;
+      if (data.pricesUpdated) msg += ` · ${data.pricesUpdated} prices updated`;
+      if (data.minStockUpdated) msg += ` · ${data.minStockUpdated} min stock updated`;
+      showToast(msg);
       setTimeout(() => openNeedsCalculator(currentSupplier), 700);
     } catch (err) {
       showToast('Could not save. Try again.', true);
@@ -1161,8 +1406,9 @@
   }
 
   // ================= NEEDS CALCULATOR =================
-  async function openNeedsCalculator(name) {
+  async function openNeedsCalculator(name, extraDays) {
     currentSupplier = name;
+    const days = extraDays || 0;
     document.getElementById('needs-supplier-name').textContent = name;
     showScreen('needs');
 
@@ -1171,7 +1417,7 @@
     contentEl.textContent = 'Calculating…';
 
     try {
-      const data = await apiGet('getRawMaterialNeeds', { supplier: name, date: todayISO() });
+      const data = await apiGet('getRawMaterialNeeds', { supplier: name, date: flowDate, extraDays: days });
       if (data.status !== 'ok') throw new Error(data.message || 'Failed to calculate needs');
 
       currentNeeds = data.items;
@@ -1180,6 +1426,11 @@
         <div class="window-banner">
           <div class="window-banner-label">This order covers</div>
           <div class="window-banner-dates">${formatDateLabel(data.windowStart)} – ${formatDateLabel(data.windowEnd)}</div>
+        </div>
+        <div class="extra-days-row">
+          <div class="field-label" style="flex:1;">Extra days beyond next delivery</div>
+          <input type="text" inputmode="numeric" class="extra-days-input" id="extra-days-input" value="${days}">
+          <button class="recalc-btn" id="recalc-btn">Recalculate</button>
         </div>`;
 
       if (currentNeeds.length === 0) {
@@ -1191,6 +1442,11 @@
       html += currentNeeds.map((item, i) => needsRowHTML(item, i)).join('');
       contentEl.className = '';
       contentEl.innerHTML = html;
+
+      document.getElementById('recalc-btn').addEventListener('click', () => {
+        const val = Math.max(0, Math.round(parseNumOr0(document.getElementById('extra-days-input').value)));
+        openNeedsCalculator(name, val);
+      });
     } catch (err) {
       contentEl.className = 'empty-state';
       contentEl.textContent = 'Could not calculate needs. Check your connection and try again.';
@@ -1237,7 +1493,7 @@
     });
 
     try {
-      const data = await apiPost('writeOrderPlan', { date: todayISO(), supplier: currentSupplier, rows });
+      const data = await apiPost('writeOrderPlan', { date: flowDate, supplier: currentSupplier, rows });
       if (data.status !== 'ok') throw new Error(data.message || 'Save failed');
 
       showToast(`Order plan saved · ${data.saved} items`);
@@ -1281,7 +1537,7 @@
     currentSupplierContact = { phone: contact.contactPhone || '', email: contact.contactEmail || '' };
 
     try {
-      const data = await apiPost('createPurchaseOrder', { date: todayISO(), supplier: name });
+      const data = await apiPost('createPurchaseOrder', { date: flowDate, supplier: name });
       if (data.status !== 'ok') throw new Error(data.message || 'Failed to build purchase order');
 
       currentPO = data;
@@ -1341,11 +1597,18 @@
     const hasEmail = !!currentSupplierContact.email;
 
     return `
-      <div class="po-banner">
-        <div class="po-number">${escapeHtml(po.poNumber)}${po.status ? ' · ' + escapeHtml(po.status) : ''}</div>
-        <div class="po-total-label">Total value</div>
-        <div class="po-total">R${Number(po.total).toFixed(2)}</div>
+      <div class="po-doc-header">
+        <img class="po-doc-logo" src="fenmeat-logo-tagline.png" alt="FenMeat">
+        <div class="po-doc-title">Purchase Order${po.status ? ' · ' + escapeHtml(po.status) : ''}</div>
+        <div class="po-doc-meta">
+          <div class="po-doc-meta-block">PO Number<strong>${escapeHtml(po.poNumber)}</strong></div>
+          <div class="po-doc-meta-block">Supplier<strong>${escapeHtml(po.supplier)}</strong></div>
+        </div>
+        <div class="po-doc-business">Fourforone (Pty) Ltd t/a FenMeat &nbsp;·&nbsp; Voorbaai, Mossel Bay</div>
       </div>
+
+      <div class="po-total-label" style="text-align:center;">Total value</div>
+      <div class="po-total" style="text-align:center; color:var(--charcoal); margin-bottom:18px;">R${Number(po.total).toFixed(2)}</div>
 
       <div class="section-label">Line items</div>
       <div class="po-lines">${linesHTML}</div>
