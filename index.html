@@ -1578,6 +1578,7 @@
   }
 
   function materialFormHTML(cfg) {
+    const isPacks = String(cfg.orderMode || 'KG').toUpperCase() === 'PACKS';
     return `
       <div class="material-form">
         <div class="field-label">${escapeHtml(cfg.title)}</div>
@@ -1590,6 +1591,14 @@
           <div class="material-form-row">
             <input type="text" inputmode="decimal" class="contact-input" id="${cfg.formId}-price" placeholder="Price" value="${cfg.price}">
             <input type="text" inputmode="decimal" class="contact-input" id="${cfg.formId}-minStock" placeholder="Min stock" value="${cfg.minStock}">
+          </div>
+          <div class="field-label" style="margin-top:4px;">How is this ordered?</div>
+          <div class="material-form-row">
+            <select class="contact-input" id="${cfg.formId}-orderMode">
+              <option value="KG" ${!isPacks ? 'selected' : ''}>By weight (kg)</option>
+              <option value="PACKS" ${isPacks ? 'selected' : ''}>By fixed pack size</option>
+            </select>
+            <input type="text" inputmode="decimal" class="contact-input" id="${cfg.formId}-orderPackSizeKg" placeholder="Pack size (kg), e.g. 3" value="${cfg.orderPackSizeKg || ''}">
           </div>
           <div class="field-label" style="margin-top:4px;">Linked product (for bought-in items with no recipe)</div>
           ${productDropdownHTML(cfg.formId, cfg.linkedProductCode)}
@@ -1618,7 +1627,9 @@
       price: document.getElementById(formId + '-price').value.trim(),
       minStock: document.getElementById(formId + '-minStock').value.trim(),
       linkedProductCode: document.getElementById(formId + '-linkedProductCode').value,
-      bagsPerPack: document.getElementById(formId + '-bagsPerPack').value.trim()
+      bagsPerPack: document.getElementById(formId + '-bagsPerPack').value.trim(),
+      orderMode: document.getElementById(formId + '-orderMode').value,
+      orderPackSizeKg: document.getElementById(formId + '-orderPackSizeKg').value.trim()
     };
   }
 
@@ -1628,6 +1639,7 @@
     slot.innerHTML = materialFormHTML({
       title: 'New Raw Material for ' + currentSupplier, name: '', nameReadonly: false,
       category: '', unit: '', price: '', minStock: '', linkedProductCode: '', bagsPerPack: '',
+      orderMode: 'KG', orderPackSizeKg: '',
       formId: 'addmatform'
     });
     wireMaterialForm('addmatform', saveNewMaterial, 'add-material-form-slot');
@@ -1642,6 +1654,7 @@
       title: 'Edit ' + m.name, name: m.name, nameReadonly: true,
       category: m.category || '', unit: m.unit || '', price: m.currentPrice || '', minStock: m.minStock || '',
       linkedProductCode: m.linkedProductCode || '', bagsPerPack: m.bagsPerPack || '',
+      orderMode: m.orderMode || 'KG', orderPackSizeKg: m.orderPackSizeKg || '',
       formId: 'editmatform-' + idx
     });
     wireMaterialForm('editmatform-' + idx, () => saveMaterialEdit(idx), 'material-edit-form-' + idx);
@@ -1796,7 +1809,13 @@
 
   function needsRowHTML(item, idx) {
     const manual = !item.hasRecipeLink;
-    const defaultOrderQty = item.suggestedOrderQty != null ? item.suggestedOrderQty : '';
+    const isPacks = String(item.orderMode || 'KG').toUpperCase() === 'PACKS' && item.orderPackSizeKg > 0;
+    const defaultOrderQty = isPacks
+      ? (item.suggestedOrderPacks != null ? item.suggestedOrderPacks : '')
+      : (item.suggestedOrderQty != null ? item.suggestedOrderQty : '');
+    const kgHint = isPacks
+      ? formatKgEquivalent(defaultOrderQty, item.orderPackSizeKg)
+      : '';
     return `
       <div class="needs-row ${manual ? 'manual' : ''}" data-idx="${idx}">
         <div class="needs-top">
@@ -1813,12 +1832,28 @@
             <div class="needs-readonly ${manual ? 'dim' : ''}">${item.stockCounted != null ? (item.stockCounted + ' ' + item.unit) : '—'}</div>
           </div>
           <div class="field-block">
-            <div class="field-label">Order qty</div>
-            <input type="text" inputmode="decimal" class="order-qty-input" data-idx="${idx}" value="${defaultOrderQty}" placeholder="0">
+            <div class="field-label">${isPacks ? 'Order qty (packs)' : 'Order qty'}</div>
+            <input type="text" inputmode="decimal" class="order-qty-input" data-idx="${idx}" data-packs="${isPacks ? '1' : '0'}" data-packsize="${item.orderPackSizeKg || ''}" value="${defaultOrderQty}" placeholder="0">
+            ${isPacks ? `<div class="unit-hint" id="packs-kg-hint-${idx}">${kgHint}</div>` : ''}
           </div>
         </div>
       </div>`;
   }
+
+  function formatKgEquivalent(packs, packSizeKg) {
+    const n = parseNumOr0(packs);
+    const kg = Math.round(n * packSizeKg * 100) / 100;
+    return `= ${kg} kg`;
+  }
+
+  document.addEventListener('input', (e) => {
+    if (e.target.classList.contains('order-qty-input') && e.target.dataset.packs === '1') {
+      const idx = e.target.dataset.idx;
+      const packSize = parseNumOr0(e.target.dataset.packsize);
+      const hintEl = document.getElementById('packs-kg-hint-' + idx);
+      if (hintEl) hintEl.textContent = formatKgEquivalent(e.target.value, packSize);
+    }
+  });
 
   async function saveOrderPlan() {
     if (!currentSupplier || currentNeeds.length === 0) return;
@@ -1829,7 +1864,12 @@
 
     const rows = currentNeeds.map((item, i) => {
       const el = document.querySelector(`.order-qty-input[data-idx="${i}"]`);
-      const orderQty = el ? parseNumOr0(el.value) : 0;
+      const rawValue = el ? parseNumOr0(el.value) : 0;
+      // Packs-mode items: the input holds a PACK COUNT (what Alex actually orders),
+      // but ORDER_QTY in the sheet stays in kg — that's the real quantity being
+      // purchased (rounded up to whole packs) and what the PO's Rand total is based on.
+      const isPacks = el && el.dataset.packs === '1';
+      const orderQty = isPacks ? Math.round(rawValue * parseNumOr0(el.dataset.packsize) * 100) / 100 : rawValue;
       return { rmCode: item.rmCode, name: item.name, forecastNeed: item.forecastNeed, stockCounted: item.stockCounted, orderQty: orderQty };
     });
 
