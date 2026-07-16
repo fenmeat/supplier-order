@@ -1905,6 +1905,7 @@
 
   // ================= PDF PURCHASE ORDER (client-side, Elevated Precision) =================
   const DOC_LOGO_ASPECT = 149 / 540; // height / width of the embedded tagline logo
+  const VAT_RATE = 0.15; // South Africa standard VAT — suppliers invoice excl-VAT prices plus 15% VAT
 
   function buildPurchaseOrderPDFBlob(po) {
     const { jsPDF } = window.jspdf;
@@ -1914,51 +1915,66 @@
     const royalBlue = [0, 60, 255];
     const charcoal = [18, 20, 28];
     const muted = [107, 114, 128];
+    const silver = [201, 205, 214];
     const platinum = [246, 245, 241];
     let y = margin;
 
-    // Logo (with-tagline, per Elevated Precision document rule)
-    const logoW = 170;
+    // ---- Dark header box (matches the in-app header/PO-review look — logo's white
+    // text and tagline need a dark background to be visible, which a plain white
+    // PDF page doesn't give them) ----
+    const logoW = 150;
     const logoH = logoW * DOC_LOGO_ASPECT;
-    doc.addImage('data:image/png;base64,' + DOC_LOGO_B64, 'PNG', margin, y, logoW, logoH);
+    const boxX = margin, boxW = pageWidth - margin * 2;
+    const boxPad = 20;
+    const statusLine = po.status ? String(po.status).toUpperCase() : '';
+    const boxH = boxPad + logoH + 22 + (statusLine ? 16 : 0) + 14 + 30 + 16 + boxPad;
 
-    // Title block, right-aligned
+    doc.setFillColor(...charcoal);
+    doc.roundedRect(boxX, y, boxW, boxH, 10, 10, 'F');
+
+    let by = y + boxPad;
+    doc.addImage('data:image/png;base64,' + DOC_LOGO_B64, 'PNG', boxX + (boxW - logoW) / 2, by, logoW, logoH);
+    by += logoH + 16;
+
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(20);
-    doc.setTextColor(...charcoal);
-    doc.text('PURCHASE ORDER', pageWidth - margin, y + 18, { align: 'right' });
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(...muted);
-    doc.text(String(po.poNumber || ''), pageWidth - margin, y + 34, { align: 'right' });
-    doc.text(formatDateLabel(po.date), pageWidth - margin, y + 48, { align: 'right' });
+    doc.setFontSize(13);
+    doc.setTextColor(255, 255, 255);
+    let titleLine = 'PURCHASE ORDER';
+    doc.text(titleLine, boxX + boxW / 2, by, { align: 'center' });
+    by += 4;
+    if (statusLine) {
+      by += 14;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(...silver);
+      doc.text(statusLine, boxX + boxW / 2, by, { align: 'center' });
+    }
+    by += 16;
 
-    y += Math.max(logoH, 55) + 18;
-
-    // Royal Blue accent rule
     doc.setDrawColor(...royalBlue);
-    doc.setLineWidth(2);
-    doc.line(margin, y, pageWidth - margin, y);
-    y += 26;
+    doc.setLineWidth(1);
+    doc.line(boxX + boxPad, by, boxX + boxW - boxPad, by);
+    by += 22;
 
-    // Supplier / From blocks side by side
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.setTextColor(...muted);
-    doc.text('SUPPLIER', margin, y);
-    doc.text('FROM', pageWidth / 2 + 10, y);
-    y += 14;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12.5);
-    doc.setTextColor(...charcoal);
-    doc.text(String(po.supplier || ''), margin, y);
-    doc.text('Fourforone (Pty) Ltd t/a FenMeat', pageWidth / 2 + 10, y);
-    y += 15;
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(...muted);
-    doc.text('Voorbaai, Mossel Bay', pageWidth / 2 + 10, y);
-    y += 26;
+    doc.setFontSize(8.5);
+    doc.setTextColor(...silver);
+    doc.text('PO NUMBER', boxX + boxPad, by);
+    doc.text('SUPPLIER', boxX + boxW / 2 + 10, by);
+    by += 13;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11.5);
+    doc.setTextColor(255, 255, 255);
+    doc.text(String(po.poNumber || ''), boxX + boxPad, by);
+    doc.text(String(po.supplier || ''), boxX + boxW / 2 + 10, by);
+    by += 18;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...silver);
+    doc.text('Fourforone (Pty) Ltd t/a FenMeat  ·  Voorbaai, Mossel Bay', boxX + boxPad, by);
+
+    y += boxH + 24;
 
     // Line items table
     const rows = (po.items || []).map(li => [
@@ -1970,7 +1986,7 @@
 
     doc.autoTable({
       startY: y,
-      head: [['Raw Material', 'Quantity', 'Price', 'Line Total']],
+      head: [['Raw Material', 'Quantity', 'Price (excl VAT)', 'Line Total']],
       body: rows,
       margin: { left: margin, right: margin },
       styles: { font: 'helvetica', fontSize: 10, textColor: charcoal, cellPadding: 7 },
@@ -1995,23 +2011,41 @@
       }
     });
 
-    let finalY = doc.lastAutoTable.finalY + 24;
+    let finalY = doc.lastAutoTable.finalY + 20;
     const pageH = doc.internal.pageSize.getHeight();
-    if (finalY + 60 > pageH - 50) { doc.addPage(); finalY = margin; }
+    if (finalY + 130 > pageH - 50) { doc.addPage(); finalY = margin; }
+
+    // VAT breakdown, right-aligned, above the total box
+    const subtotal = Number(po.total) || 0;
+    const vatAmount = Math.round(subtotal * VAT_RATE * 100) / 100;
+    const totalInclVat = Math.round((subtotal + vatAmount) * 100) / 100;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...muted);
+    doc.text('Subtotal (excl VAT)', pageWidth - margin - 200, finalY, { align: 'left' });
+    doc.setTextColor(...charcoal);
+    doc.text(formatRand(subtotal), pageWidth - margin, finalY, { align: 'right' });
+    finalY += 16;
+    doc.setTextColor(...muted);
+    doc.text('VAT (15%)', pageWidth - margin - 200, finalY, { align: 'left' });
+    doc.setTextColor(...charcoal);
+    doc.text(formatRand(vatAmount), pageWidth - margin, finalY, { align: 'right' });
+    finalY += 18;
 
     // Total box, right-aligned
-    const boxW = 200, boxH = 46;
-    const boxX = pageWidth - margin - boxW;
+    const boxW2 = 200, boxH2 = 46;
+    const boxX2 = pageWidth - margin - boxW2;
     doc.setFillColor(...charcoal);
-    doc.roundedRect(boxX, finalY, boxW, boxH, 6, 6, 'F');
+    doc.roundedRect(boxX2, finalY, boxW2, boxH2, 6, 6, 'F');
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(...platinum);
-    doc.text('TOTAL VALUE', boxX + 14, finalY + 18);
+    doc.text('TOTAL (INCL VAT)', boxX2 + 14, finalY + 18);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
     doc.setTextColor(255, 255, 255);
-    doc.text(formatRand(Number(po.total)), boxX + boxW - 14, finalY + 36, { align: 'right' });
+    doc.text(formatRand(totalInclVat), boxX2 + boxW2 - 14, finalY + 36, { align: 'right' });
 
     return doc.output('blob');
   }
@@ -2019,6 +2053,15 @@
   function poPdfFilename(po) {
     const safeSupplier = String(po.supplier || 'Supplier').replace(/[^a-z0-9]+/gi, '-');
     return `PO-${po.poNumber || 'draft'}-${safeSupplier}.pdf`;
+  }
+
+  function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
   }
 
   async function sharePurchaseOrderPDF(po, whatsappPhone) {
@@ -2138,6 +2181,10 @@
     const hasPhone = !!currentSupplierContact.phone;
     const hasEmail = !!currentSupplierContact.email;
 
+    const subtotal = Number(po.total) || 0;
+    const vatAmount = Math.round(subtotal * VAT_RATE * 100) / 100;
+    const totalInclVat = Math.round((subtotal + vatAmount) * 100) / 100;
+
     return `
       <div class="po-doc-header">
         <img class="po-doc-logo" src="data:image/png;base64,${DOC_LOGO_B64}" alt="FenMeat">
@@ -2149,8 +2196,12 @@
         <div class="po-doc-business">Fourforone (Pty) Ltd t/a FenMeat &nbsp;·&nbsp; Voorbaai, Mossel Bay</div>
       </div>
 
-      <div class="po-total-label" style="text-align:center;">Total value</div>
-      <div class="po-total" style="text-align:center; color:var(--charcoal); margin-bottom:18px;">${formatRand(Number(po.total))}</div>
+      <div class="vat-breakdown" style="max-width:240px; margin:0 auto 4px;">
+        <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--muted); padding:2px 0;"><span>Subtotal (excl VAT)</span><span>${formatRand(subtotal)}</span></div>
+        <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--muted); padding:2px 0;"><span>VAT (15%)</span><span>${formatRand(vatAmount)}</span></div>
+      </div>
+      <div class="po-total-label" style="text-align:center;">Total (incl VAT)</div>
+      <div class="po-total" style="text-align:center; color:var(--charcoal); margin-bottom:18px;">${formatRand(totalInclVat)}</div>
 
       <div class="section-label">Line items</div>
       <div class="po-lines">${linesHTML}</div>
@@ -2245,7 +2296,15 @@
         if (!email) { showToast('Add an email address first.', true); return; }
         if (btn) btn.textContent = 'Sending…';
 
-        const sendData = await apiPost('sendPurchaseOrderEmailWithPDF', { poNumber: currentPO.poNumber, recipientEmail: email });
+        // Generate the same branded PDF used for WhatsApp and send it as a real
+        // attachment — the old server-side HTML-to-PDF path (Apps Script's basic
+        // renderer) couldn't reliably render the dark header box or the logo.
+        const blob = buildPurchaseOrderPDFBlob(currentPO);
+        const pdfBase64 = await blobToBase64(blob);
+        const sendData = await apiPost('sendPurchaseOrderEmailAttachment', {
+          poNumber: currentPO.poNumber, recipientEmail: email,
+          pdfBase64: pdfBase64, fileName: poPdfFilename(currentPO)
+        });
         if (sendData.status !== 'ok') throw new Error(sendData.message || 'Could not send email');
       }
 
